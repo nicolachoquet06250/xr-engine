@@ -7,18 +7,45 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "echo 'Run dev scripts at package level'",
-    "build": "echo 'Run build scripts at package level'",
-    "test": "echo 'Run tests at package level'"
+    "dev": "npm run dev:sandbox",
+    "dev:sandbox": "npm run dev --workspace @xr-engine/sandbox",
+    "dev:playground": "npm run dev --workspace @xr-engine/playground",
+    "dev:docs": "npm run dev --workspace @xr-engine/docs",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build --workspace @xr-engine/assets --workspace @xr-engine/audio --workspace @xr-engine/core --workspace @xr-engine/devtools --workspace @xr-engine/examples --workspace @xr-engine/gameplay --workspace @xr-engine/input --workspace @xr-engine/interaction --workspace @xr-engine/math --workspace @xr-engine/physics --workspace @xr-engine/renderer --workspace @xr-engine/scene --workspace @xr-engine/testing --workspace @xr-engine/ui-core --workspace @xr-engine/ui-webcomponents --workspace @xr-engine/wasm --workspace @xr-engine/xr --if-present",
+    "build:apps": "npm run build --workspace @xr-engine/docs --workspace @xr-engine/playground --workspace @xr-engine/sandbox --if-present",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --check",
+    "format:write": "prettier . --write",
+    "verify": "npm run typecheck && npm run lint && npm run test:unit && npm run build",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:packages": "vitest run --config vitest.config.ts packages",
+    "test:apps": "vitest run --config vitest.config.ts apps",
+    "ci:verify": "npm run format && npm run lint && npm run typecheck && npm run test:coverage && npm run build",
+    "build:ci": "npm run build",
+    "artifacts:collect": "node ./configs/ci/collect-artifacts.mjs"
   },
   "devDependencies": {
     "@types/jsdom": "^28.0.1",
     "@vitejs/plugin-vue": "^6.0.6",
+    "eslint": "^10.2.1",
+    "globals": "^16.0.0",
     "jsdom": "^27.0.1",
+    "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "vite": "^8.0.0",
+    "vite-plugin-eslint": "^1.8.1",
     "vite-tsconfig-paths": "^6.0.0",
     "vitest": "^4.1.0",
     "vue": "^3.5.32"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.39.4",
+    "typescript-eslint": "^8.59.0"
   }
 }
