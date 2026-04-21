@@ -49,25 +49,41 @@ import {
 
 const EPS = 1e-5;
 
-function expectVec2Close(actual: { x: number; y: number }, expected: { x: number; y: number }, precision = 5): void {
+function expectVec2Close(
+  actual: { x: number; y: number },
+  expected: { x: number; y: number },
+  precision = 5
+): void {
   expect(actual.x).toBeCloseTo(expected.x, precision);
   expect(actual.y).toBeCloseTo(expected.y, precision);
 }
 
-function expectVec3Close(actual: { x: number; y: number; z: number }, expected: { x: number; y: number; z: number }, precision = 5): void {
+function expectVec3Close(
+  actual: { x: number; y: number; z: number },
+  expected: { x: number; y: number; z: number },
+  precision = 5
+): void {
   expect(actual.x).toBeCloseTo(expected.x, precision);
   expect(actual.y).toBeCloseTo(expected.y, precision);
   expect(actual.z).toBeCloseTo(expected.z, precision);
 }
 
-function expectQuatClose(actual: { x: number; y: number; z: number; w: number }, expected: { x: number; y: number; z: number; w: number }, precision = 5): void {
+function expectQuatClose(
+  actual: { x: number; y: number; z: number; w: number },
+  expected: { x: number; y: number; z: number; w: number },
+  precision = 5
+): void {
   expect(actual.x).toBeCloseTo(expected.x, precision);
   expect(actual.y).toBeCloseTo(expected.y, precision);
   expect(actual.z).toBeCloseTo(expected.z, precision);
   expect(actual.w).toBeCloseTo(expected.w, precision);
 }
 
-function expectMat4Close(actual: ArrayLike<number>, expected: ArrayLike<number>, precision = 5): void {
+function expectMat4Close(
+  actual: ArrayLike<number>,
+  expected: ArrayLike<number>,
+  precision = 5
+): void {
   expect(actual.length).toBe(expected.length);
   for (let i = 0; i < actual.length; i += 1) {
     expect(actual[i]).toBeCloseTo(expected[i], precision);
@@ -88,17 +104,8 @@ describe('math constructors', () => {
     expectVec3Close(vec3(), { x: 0, y: 0, z: 0 });
     expect(vec4()).toEqual({ x: 0, y: 0, z: 0, w: 0 });
     expect(quat()).toEqual({ x: 0, y: 0, z: 0, w: 1 });
-    expect(Array.from(mat3().elements)).toEqual([
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1,
-    ]);
-    expect(Array.from(mat4().elements)).toEqual([
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1,
-    ]);
+    expect(Array.from(mat3().elements)).toEqual([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+    expect(Array.from(mat4().elements)).toEqual([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
     expect(Object.isFrozen(vec2(1, 2))).toBe(true);
     expect(Object.isFrozen(vec3(1, 2, 3))).toBe(true);
     expect(Object.isFrozen(quat())).toBe(true);
@@ -106,12 +113,7 @@ describe('math constructors', () => {
 
   it('copies numeric arrays into matrices', () => {
     const m = mat4(new Float32Array([1, 2, 3, 4]));
-    expect(Array.from(m.elements)).toEqual([
-      1, 2, 3, 4,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1,
-    ]);
+    expect(Array.from(m.elements)).toEqual([1, 2, 3, 4, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   });
 });
 
@@ -153,7 +155,10 @@ describe('quaternions', () => {
     expect(normalizeQuat(quat(0, 0, 0, 0))).toEqual({ x: 0, y: 0, z: 0, w: 1 });
     const ninetyZ = quatFromEuler({ x: 0, y: 0, z: Math.PI / 2 });
     const oneEightyZ = multiplyQuat(ninetyZ, ninetyZ);
-    const direction = transformDirection(composeTRS({ translation: vec3(), rotation: oneEightyZ, scale: vec3(1, 1, 1) }), vec3(1, 0, 0));
+    const direction = transformDirection(
+      composeTRS({ translation: vec3(), rotation: oneEightyZ, scale: vec3(1, 1, 1) }),
+      vec3(1, 0, 0)
+    );
     expectVec3Close(direction, { x: -1, y: 0, z: 0 }, 4);
   });
 
@@ -161,7 +166,10 @@ describe('quaternions', () => {
     const start = quat();
     const end = quatFromEuler({ x: 0, y: 0, z: Math.PI });
     const halfway = slerpQuat(start, end, 0.5);
-    const direction = transformDirection(composeTRS({ translation: vec3(), rotation: halfway, scale: vec3(1, 1, 1) }), vec3(1, 0, 0));
+    const direction = transformDirection(
+      composeTRS({ translation: vec3(), rotation: halfway, scale: vec3(1, 1, 1) }),
+      vec3(1, 0, 0)
+    );
     expectVec3Close(direction, { x: 0, y: 1, z: 0 }, 4);
   });
 
@@ -178,22 +186,18 @@ describe('quaternions', () => {
 
 describe('mat4 operations', () => {
   it('multiplies matrices and transposes matrices', () => {
-    const translation = composeTRS({ translation: vec3(3, 4, 5), rotation: quat(), scale: vec3(1, 1, 1) });
+    const translation = composeTRS({
+      translation: vec3(3, 4, 5),
+      rotation: quat(),
+      scale: vec3(1, 1, 1),
+    });
     const scale = composeTRS({ translation: vec3(), rotation: quat(), scale: vec3(2, 3, 4) });
     const combined = multiplyMat4(translation, scale);
     expectVec3Close(transformPoint(combined, vec3(1, 1, 1)), { x: 5, y: 7, z: 9 });
 
-    const transposed = transposeMat4(mat4([
-      1, 2, 3, 4,
-      5, 6, 7, 8,
-      9, 10, 11, 12,
-      13, 14, 15, 16,
-    ]));
+    const transposed = transposeMat4(mat4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]));
     expect(Array.from(transposed.elements)).toEqual([
-      1, 5, 9, 13,
-      2, 6, 10, 14,
-      3, 7, 11, 15,
-      4, 8, 12, 16,
+      1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15, 4, 8, 12, 16,
     ]);
   });
 
@@ -220,7 +224,10 @@ describe('mat4 operations', () => {
     const decomposed = decomposeTRS(matrix);
     expectVec3Close(decomposed.translation, trs.translation);
     expectVec3Close(decomposed.scale, trs.scale);
-    const forward = transformDirection(composeTRS({ translation: vec3(), rotation: decomposed.rotation, scale: vec3(1, 1, 1) }), vec3(1, 0, 0));
+    const forward = transformDirection(
+      composeTRS({ translation: vec3(), rotation: decomposed.rotation, scale: vec3(1, 1, 1) }),
+      vec3(1, 0, 0)
+    );
     expectVec3Close(forward, { x: 0, y: 1, z: 0 }, 4);
   });
 
@@ -239,30 +246,36 @@ describe('intersections', () => {
   it('intersects a ray with a plane', () => {
     const t = intersectRayPlane(
       { origin: vec3(0, 0, 0), direction: vec3(0, 0, 1) },
-      { normal: vec3(0, 0, 1), constant: -5 },
+      { normal: vec3(0, 0, 1), constant: -5 }
     );
     expect(t).toBe(5);
-    expect(intersectRayPlane(
-      { origin: vec3(0, 0, 0), direction: vec3(1, 0, 0) },
-      { normal: vec3(0, 0, 1), constant: -5 },
-    )).toBeNull();
+    expect(
+      intersectRayPlane(
+        { origin: vec3(0, 0, 0), direction: vec3(1, 0, 0) },
+        { normal: vec3(0, 0, 1), constant: -5 }
+      )
+    ).toBeNull();
   });
 
   it('intersects a ray with a sphere', () => {
     const t = intersectRaySphere(
       { origin: vec3(0, 0, -10), direction: vec3(0, 0, 1) },
-      { center: vec3(0, 0, 0), radius: 2 },
+      { center: vec3(0, 0, 0), radius: 2 }
     );
     expect(t).toBeCloseTo(8, 5);
-    expect(intersectRaySphere(
-      { origin: vec3(0, 0, -10), direction: vec3(0, 1, 0) },
-      { center: vec3(0, 0, 0), radius: 2 },
-    )).toBeNull();
+    expect(
+      intersectRaySphere(
+        { origin: vec3(0, 0, -10), direction: vec3(0, 1, 0) },
+        { center: vec3(0, 0, 0), radius: 2 }
+      )
+    ).toBeNull();
   });
 
   it('intersects a ray with an axis-aligned bounding box', () => {
     const aabb = { min: vec3(-1, -1, -1), max: vec3(1, 1, 1) };
-    expect(intersectRayAABB({ origin: vec3(-5, 0, 0), direction: vec3(1, 0, 0) }, aabb)).toBeCloseTo(4, 5);
+    expect(
+      intersectRayAABB({ origin: vec3(-5, 0, 0), direction: vec3(1, 0, 0) }, aabb)
+    ).toBeCloseTo(4, 5);
     expect(intersectRayAABB({ origin: vec3(0, 2, 0), direction: vec3(1, 0, 0) }, aabb)).toBeNull();
   });
 
@@ -278,34 +291,55 @@ describe('intersections', () => {
       ],
     };
 
-    expect(intersectFrustumAABB(frustum, { min: vec3(-0.5, -0.5, -0.5), max: vec3(0.5, 0.5, 0.5) })).toBe(true);
+    expect(
+      intersectFrustumAABB(frustum, { min: vec3(-0.5, -0.5, -0.5), max: vec3(0.5, 0.5, 0.5) })
+    ).toBe(true);
     expect(intersectFrustumAABB(frustum, { min: vec3(2, 2, 2), max: vec3(3, 3, 3) })).toBe(false);
   });
 });
 
 describe('hand tracking helpers', () => {
   it('computes pinch distance and palm forward vector', () => {
-    expect(computePinchDistance(joint(vec3(0, 0, 0)), joint(vec3(0, 0.03, 0.04)))).toBeCloseTo(0.05, 5);
-    expectVec3Close(computePalmForward(joint(vec3(0, 0, 1)), joint(vec3(0, 0, 0))), { x: 0, y: 0, z: 1 });
+    expect(computePinchDistance(joint(vec3(0, 0, 0)), joint(vec3(0, 0.03, 0.04)))).toBeCloseTo(
+      0.05,
+      5
+    );
+    expectVec3Close(computePalmForward(joint(vec3(0, 0, 1)), joint(vec3(0, 0, 0))), {
+      x: 0,
+      y: 0,
+      z: 1,
+    });
   });
 
   it('computes joint angle and pose delta', () => {
-    const angle = computeJointAngle(joint(vec3(1, 0, 0)), joint(vec3(0, 0, 0)), joint(vec3(0, 1, 0)));
+    const angle = computeJointAngle(
+      joint(vec3(1, 0, 0)),
+      joint(vec3(0, 0, 0)),
+      joint(vec3(0, 1, 0))
+    );
     expect(angle).toBeCloseTo(Math.PI / 2, 5);
 
     const delta = computePoseDelta(
       joint(vec3(1, 2, 3), quat()),
-      joint(vec3(2, 4, 6), quatFromEuler({ x: 0, y: 0, z: Math.PI / 2 })),
+      joint(vec3(2, 4, 6), quatFromEuler({ x: 0, y: 0, z: Math.PI / 2 }))
     );
 
     expectVec3Close(delta.positionDelta, { x: 1, y: 2, z: 3 });
-    const rotated = transformDirection(composeTRS({ translation: vec3(), rotation: delta.rotationDelta, scale: vec3(1, 1, 1) }), vec3(1, 0, 0));
+    const rotated = transformDirection(
+      composeTRS({ translation: vec3(), rotation: delta.rotationDelta, scale: vec3(1, 1, 1) }),
+      vec3(1, 0, 0)
+    );
     expectVec3Close(rotated, { x: 0, y: 1, z: 0 }, 4);
   });
 
   it('computes hand openness in a normalized range', () => {
     const closed = [joint(vec3(0, 0, 0)), joint(vec3(0.002, 0, 0)), joint(vec3(0, 0.002, 0))];
-    const open = [joint(vec3(-0.08, 0, 0)), joint(vec3(0.08, 0, 0)), joint(vec3(0, 0.08, 0)), joint(vec3(0, -0.08, 0))];
+    const open = [
+      joint(vec3(-0.08, 0, 0)),
+      joint(vec3(0.08, 0, 0)),
+      joint(vec3(0, 0.08, 0)),
+      joint(vec3(0, -0.08, 0)),
+    ];
 
     const closedValue = computeHandOpenness(closed);
     const openValue = computeHandOpenness(open);

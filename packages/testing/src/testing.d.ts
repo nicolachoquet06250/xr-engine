@@ -1,33 +1,33 @@
 export interface TestEngine {
-    readonly engine: unknown;
+  readonly engine: unknown;
 }
 
 export interface TestHarness {
-    readonly engine: TestEngine;
+  readonly engine: TestEngine;
 }
 
 export interface MockXRSession {
-    readonly active: boolean;
+  readonly active: boolean;
 }
 
 export interface MockXRHand {
-    readonly handedness: 'left' | 'right';
+  readonly handedness: 'left' | 'right';
 }
 
 export interface MockXRController {
-    readonly handedness: 'left' | 'right';
+  readonly handedness: 'left' | 'right';
 }
 
 export interface MockGamepad {
-    readonly connected: boolean;
+  readonly connected: boolean;
 }
 
 export interface TestFixture {
-    readonly id: string;
+  readonly id: string;
 }
 
 export interface FrameDriver {
-    tick(frames?: number): void;
+  tick(frames?: number): void;
 }
 
 export declare function createTestEngine(): TestEngine;

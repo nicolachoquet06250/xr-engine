@@ -80,7 +80,11 @@ export interface PhysicsWorld {
   raycast(ray: Ray, options?: { maxDistance?: number; mask?: number }): RaycastHit | null;
   overlapSphere(center: Vec3, radius: number): readonly Collider[];
   createRigidBody(config: { entity?: Entity | null; type?: RigidBodyType }): RigidBody;
-  createCollider(config: { entity?: Entity | null; shape: 'box' | 'sphere' | 'capsule' | 'mesh'; isTrigger?: boolean }): Collider;
+  createCollider(config: {
+    entity?: Entity | null;
+    shape: 'box' | 'sphere' | 'capsule' | 'mesh';
+    isTrigger?: boolean;
+  }): Collider;
   createCharacterController(config?: { entity?: Entity | null }): CharacterController;
 }
 

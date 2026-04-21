@@ -1,9 +1,14 @@
 export type {
-    GameMode, GameEvent,
-    GameRule, GameState,
-    InteractionRule, GameplaySystem,
-    GameplayContext, ScriptBehaviour,
-    SpawnRequest, SpawnService
+  GameMode,
+  GameEvent,
+  GameRule,
+  GameState,
+  InteractionRule,
+  GameplaySystem,
+  GameplayContext,
+  ScriptBehaviour,
+  SpawnRequest,
+  SpawnService,
 } from './gameplay';
 
 // Placeholder for gameplay package

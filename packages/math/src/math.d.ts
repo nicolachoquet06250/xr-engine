@@ -1,90 +1,90 @@
 export type NumericArray = ArrayLike<number>;
 
 export interface Vec2 {
-    readonly x: number;
-    readonly y: number;
+  readonly x: number;
+  readonly y: number;
 }
 
 export interface Vec3 {
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
 }
 
 export interface Vec4 {
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
-    readonly w: number;
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+  readonly w: number;
 }
 
 export interface Quat {
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
-    readonly w: number;
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+  readonly w: number;
 }
 
 export interface Mat3 {
-    readonly elements: Readonly<NumericArray>;
+  readonly elements: Readonly<NumericArray>;
 }
 
 export interface Mat4 {
-    readonly elements: Readonly<NumericArray>;
+  readonly elements: Readonly<NumericArray>;
 }
 
 export interface Ray {
-    readonly origin: Vec3;
-    readonly direction: Vec3;
+  readonly origin: Vec3;
+  readonly direction: Vec3;
 }
 
 export interface Plane {
-    readonly normal: Vec3;
-    readonly constant: number;
+  readonly normal: Vec3;
+  readonly constant: number;
 }
 
 export interface Sphere {
-    readonly center: Vec3;
-    readonly radius: number;
+  readonly center: Vec3;
+  readonly radius: number;
 }
 
 export interface AABB {
-    readonly min: Vec3;
-    readonly max: Vec3;
+  readonly min: Vec3;
+  readonly max: Vec3;
 }
 
 export interface OBB {
-    readonly center: Vec3;
-    readonly halfExtents: Vec3;
-    readonly orientation: Quat;
+  readonly center: Vec3;
+  readonly halfExtents: Vec3;
+  readonly orientation: Quat;
 }
 
 export interface Frustum {
-    readonly planes: readonly [Plane, Plane, Plane, Plane, Plane, Plane];
+  readonly planes: readonly [Plane, Plane, Plane, Plane, Plane, Plane];
 }
 
 export interface EulerAngles {
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
-    readonly order?: 'XYZ' | 'XZY' | 'YXZ' | 'YZX' | 'ZXY' | 'ZYX';
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+  readonly order?: 'XYZ' | 'XZY' | 'YXZ' | 'YZX' | 'ZXY' | 'ZYX';
 }
 
 export interface TRS {
-    readonly translation: Vec3;
-    readonly rotation: Quat;
-    readonly scale: Vec3;
+  readonly translation: Vec3;
+  readonly rotation: Quat;
+  readonly scale: Vec3;
 }
 
 export interface PoseDelta {
-    readonly positionDelta: Vec3;
-    readonly rotationDelta: Quat;
+  readonly positionDelta: Vec3;
+  readonly rotationDelta: Quat;
 }
 
 export interface HandJointPose {
-    readonly position: Vec3;
-    readonly rotation: Quat;
-    readonly radius?: number;
+  readonly position: Vec3;
+  readonly rotation: Quat;
+  readonly radius?: number;
 }
 
 export declare function vec2(x?: number, y?: number): Vec2;
@@ -130,8 +130,18 @@ export declare function intersectRaySphere(ray: Ray, sphere: Sphere): number | n
 export declare function intersectRayAABB(ray: Ray, aabb: AABB): number | null;
 export declare function intersectFrustumAABB(frustum: Frustum, aabb: AABB): boolean;
 
-export declare function computePinchDistance(thumbTip: HandJointPose, indexTip: HandJointPose): number;
+export declare function computePinchDistance(
+  thumbTip: HandJointPose,
+  indexTip: HandJointPose
+): number;
 export declare function computePalmForward(palm: HandJointPose, wrist: HandJointPose): Vec3;
-export declare function computeJointAngle(a: HandJointPose, joint: HandJointPose, b: HandJointPose): number;
+export declare function computeJointAngle(
+  a: HandJointPose,
+  joint: HandJointPose,
+  b: HandJointPose
+): number;
 export declare function computeHandOpenness(joints: readonly HandJointPose[]): number;
-export declare function computePoseDelta(previousPose: HandJointPose, nextPose: HandJointPose): PoseDelta;
+export declare function computePoseDelta(
+  previousPose: HandJointPose,
+  nextPose: HandJointPose
+): PoseDelta;

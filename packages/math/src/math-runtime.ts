@@ -88,17 +88,8 @@ export interface HandJointPose {
 }
 
 const EPSILON = 1e-8;
-const IDENTITY_MAT3 = new Float32Array([
-  1, 0, 0,
-  0, 1, 0,
-  0, 0, 1,
-]);
-const IDENTITY_MAT4 = new Float32Array([
-  1, 0, 0, 0,
-  0, 1, 0, 0,
-  0, 0, 1, 0,
-  0, 0, 0, 1,
-]);
+const IDENTITY_MAT3 = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+const IDENTITY_MAT4 = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -108,7 +99,11 @@ function safeSqrt(value: number): number {
   return Math.sqrt(Math.max(0, value));
 }
 
-function copyToFloat32(elements: NumericArray, expectedLength: number, fallback: Float32Array): Float32Array {
+function copyToFloat32(
+  elements: NumericArray,
+  expectedLength: number,
+  fallback: Float32Array
+): Float32Array {
   const out = new Float32Array(expectedLength);
   if (elements.length === 0) {
     out.set(fallback);
@@ -144,29 +139,51 @@ export function mat4(elements: NumericArray = IDENTITY_MAT4): Mat4 {
   return Object.freeze({ elements: copyToFloat32(elements, 16, IDENTITY_MAT4) });
 }
 
-export function addVec2(a: Vec2, b: Vec2): Vec2 { return vec2(a.x + b.x, a.y + b.y); }
-export function subVec2(a: Vec2, b: Vec2): Vec2 { return vec2(a.x - b.x, a.y - b.y); }
-export function scaleVec2(v: Vec2, scalar: number): Vec2 { return vec2(v.x * scalar, v.y * scalar); }
-export function dotVec2(a: Vec2, b: Vec2): number { return a.x * b.x + a.y * b.y; }
-export function lengthVec2(v: Vec2): number { return Math.hypot(v.x, v.y); }
+export function addVec2(a: Vec2, b: Vec2): Vec2 {
+  return vec2(a.x + b.x, a.y + b.y);
+}
+export function subVec2(a: Vec2, b: Vec2): Vec2 {
+  return vec2(a.x - b.x, a.y - b.y);
+}
+export function scaleVec2(v: Vec2, scalar: number): Vec2 {
+  return vec2(v.x * scalar, v.y * scalar);
+}
+export function dotVec2(a: Vec2, b: Vec2): number {
+  return a.x * b.x + a.y * b.y;
+}
+export function lengthVec2(v: Vec2): number {
+  return Math.hypot(v.x, v.y);
+}
 export function normalizeVec2(v: Vec2): Vec2 {
   const length = lengthVec2(v);
   return length <= EPSILON ? vec2(0, 0) : scaleVec2(v, 1 / length);
 }
 
-export function addVec3(a: Vec3, b: Vec3): Vec3 { return vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
-export function subVec3(a: Vec3, b: Vec3): Vec3 { return vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
-export function scaleVec3(v: Vec3, scalar: number): Vec3 { return vec3(v.x * scalar, v.y * scalar, v.z * scalar); }
-export function dotVec3(a: Vec3, b: Vec3): number { return a.x * b.x + a.y * b.y + a.z * b.z; }
+export function addVec3(a: Vec3, b: Vec3): Vec3 {
+  return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+export function subVec3(a: Vec3, b: Vec3): Vec3 {
+  return vec3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+export function scaleVec3(v: Vec3, scalar: number): Vec3 {
+  return vec3(v.x * scalar, v.y * scalar, v.z * scalar);
+}
+export function dotVec3(a: Vec3, b: Vec3): number {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 export function crossVec3(a: Vec3, b: Vec3): Vec3 {
   return vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
-export function lengthVec3(v: Vec3): number { return Math.hypot(v.x, v.y, v.z); }
+export function lengthVec3(v: Vec3): number {
+  return Math.hypot(v.x, v.y, v.z);
+}
 export function normalizeVec3(v: Vec3): Vec3 {
   const length = lengthVec3(v);
   return length <= EPSILON ? vec3(0, 0, 0) : scaleVec3(v, 1 / length);
 }
-export function distanceVec3(a: Vec3, b: Vec3): number { return lengthVec3(subVec3(a, b)); }
+export function distanceVec3(a: Vec3, b: Vec3): number {
+  return lengthVec3(subVec3(a, b));
+}
 export function lerpVec3(a: Vec3, b: Vec3, t: number): Vec3 {
   return vec3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t);
 }
@@ -176,12 +193,14 @@ export function multiplyQuat(a: Quat, b: Quat): Quat {
     a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
     a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
     a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
-    a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+    a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
   );
 }
 export function normalizeQuat(q: Quat): Quat {
   const length = Math.hypot(q.x, q.y, q.z, q.w);
-  return length <= EPSILON ? quat(0, 0, 0, 1) : quat(q.x / length, q.y / length, q.z / length, q.w / length);
+  return length <= EPSILON
+    ? quat(0, 0, 0, 1)
+    : quat(q.x / length, q.y / length, q.z / length, q.w / length);
 }
 export function slerpQuat(a: Quat, b: Quat, t: number): Quat {
   let cosHalfTheta = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
@@ -191,28 +210,42 @@ export function slerpQuat(a: Quat, b: Quat, t: number): Quat {
     cosHalfTheta = -cosHalfTheta;
   }
   if (cosHalfTheta >= 1 - EPSILON) {
-    return normalizeQuat(quat(
-      a.x + (end.x - a.x) * t,
-      a.y + (end.y - a.y) * t,
-      a.z + (end.z - a.z) * t,
-      a.w + (end.w - a.w) * t,
-    ));
+    return normalizeQuat(
+      quat(
+        a.x + (end.x - a.x) * t,
+        a.y + (end.y - a.y) * t,
+        a.z + (end.z - a.z) * t,
+        a.w + (end.w - a.w) * t
+      )
+    );
   }
   const halfTheta = Math.acos(clamp(cosHalfTheta, -1, 1));
   const sinHalfTheta = safeSqrt(1 - cosHalfTheta * cosHalfTheta);
   if (Math.abs(sinHalfTheta) <= EPSILON) {
-    return normalizeQuat(quat((a.x + end.x) * 0.5, (a.y + end.y) * 0.5, (a.z + end.z) * 0.5, (a.w + end.w) * 0.5));
+    return normalizeQuat(
+      quat((a.x + end.x) * 0.5, (a.y + end.y) * 0.5, (a.z + end.z) * 0.5, (a.w + end.w) * 0.5)
+    );
   }
   const ratioA = Math.sin((1 - t) * halfTheta) / sinHalfTheta;
   const ratioB = Math.sin(t * halfTheta) / sinHalfTheta;
-  return quat(a.x * ratioA + end.x * ratioB, a.y * ratioA + end.y * ratioB, a.z * ratioA + end.z * ratioB, a.w * ratioA + end.w * ratioB);
+  return quat(
+    a.x * ratioA + end.x * ratioB,
+    a.y * ratioA + end.y * ratioB,
+    a.z * ratioA + end.z * ratioB,
+    a.w * ratioA + end.w * ratioB
+  );
 }
 
 function quatFromAxisAngle(axis: Vec3, angle: number): Quat {
   const half = angle * 0.5;
   const sinHalf = Math.sin(half);
   const normalizedAxis = normalizeVec3(axis);
-  return quat(normalizedAxis.x * sinHalf, normalizedAxis.y * sinHalf, normalizedAxis.z * sinHalf, Math.cos(half));
+  return quat(
+    normalizedAxis.x * sinHalf,
+    normalizedAxis.y * sinHalf,
+    normalizedAxis.z * sinHalf,
+    Math.cos(half)
+  );
 }
 
 export function quatFromEuler(euler: EulerAngles): Quat {
@@ -220,12 +253,18 @@ export function quatFromEuler(euler: EulerAngles): Quat {
   const yq = quatFromAxisAngle(vec3(0, 1, 0), euler.y);
   const zq = quatFromAxisAngle(vec3(0, 0, 1), euler.z);
   switch (euler.order ?? 'XYZ') {
-    case 'XYZ': return normalizeQuat(multiplyQuat(multiplyQuat(xq, yq), zq));
-    case 'XZY': return normalizeQuat(multiplyQuat(multiplyQuat(xq, zq), yq));
-    case 'YXZ': return normalizeQuat(multiplyQuat(multiplyQuat(yq, xq), zq));
-    case 'YZX': return normalizeQuat(multiplyQuat(multiplyQuat(yq, zq), xq));
-    case 'ZXY': return normalizeQuat(multiplyQuat(multiplyQuat(zq, xq), yq));
-    case 'ZYX': return normalizeQuat(multiplyQuat(multiplyQuat(zq, yq), xq));
+    case 'XYZ':
+      return normalizeQuat(multiplyQuat(multiplyQuat(xq, yq), zq));
+    case 'XZY':
+      return normalizeQuat(multiplyQuat(multiplyQuat(xq, zq), yq));
+    case 'YXZ':
+      return normalizeQuat(multiplyQuat(multiplyQuat(yq, xq), zq));
+    case 'YZX':
+      return normalizeQuat(multiplyQuat(multiplyQuat(yq, zq), xq));
+    case 'ZXY':
+      return normalizeQuat(multiplyQuat(multiplyQuat(zq, xq), yq));
+    case 'ZYX':
+      return normalizeQuat(multiplyQuat(multiplyQuat(zq, yq), xq));
   }
 }
 
@@ -248,7 +287,11 @@ export function multiplyMat4(a: Mat4, b: Mat4): Mat4 {
   const out = new Float32Array(16);
   for (let col = 0; col < 4; col += 1) {
     for (let row = 0; row < 4; row += 1) {
-      out[col * 4 + row] = ae[0 * 4 + row] * be[col * 4 + 0] + ae[1 * 4 + row] * be[col * 4 + 1] + ae[2 * 4 + row] * be[col * 4 + 2] + ae[3 * 4 + row] * be[col * 4 + 3];
+      out[col * 4 + row] =
+        ae[0 * 4 + row] * be[col * 4 + 0] +
+        ae[1 * 4 + row] * be[col * 4 + 1] +
+        ae[2 * 4 + row] * be[col * 4 + 2] +
+        ae[3 * 4 + row] * be[col * 4 + 3];
     }
   }
   return mat4(out);
@@ -257,10 +300,22 @@ export function multiplyMat4(a: Mat4, b: Mat4): Mat4 {
 export function invertMat4(m: Mat4): Mat4 {
   const a = m.elements;
   const out = new Float32Array(16);
-  const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
-  const a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
-  const a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
-  const a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+  const a00 = a[0],
+    a01 = a[1],
+    a02 = a[2],
+    a03 = a[3];
+  const a10 = a[4],
+    a11 = a[5],
+    a12 = a[6],
+    a13 = a[7];
+  const a20 = a[8],
+    a21 = a[9],
+    a22 = a[10],
+    a23 = a[11];
+  const a30 = a[12],
+    a31 = a[13],
+    a32 = a[14],
+    a33 = a[15];
   const b00 = a00 * a11 - a01 * a10;
   const b01 = a00 * a12 - a02 * a10;
   const b02 = a00 * a13 - a03 * a10;
@@ -297,22 +352,59 @@ export function invertMat4(m: Mat4): Mat4 {
 
 export function transposeMat4(m: Mat4): Mat4 {
   const e = m.elements;
-  return mat4([e[0], e[4], e[8], e[12], e[1], e[5], e[9], e[13], e[2], e[6], e[10], e[14], e[3], e[7], e[11], e[15]]);
+  return mat4([
+    e[0],
+    e[4],
+    e[8],
+    e[12],
+    e[1],
+    e[5],
+    e[9],
+    e[13],
+    e[2],
+    e[6],
+    e[10],
+    e[14],
+    e[3],
+    e[7],
+    e[11],
+    e[15],
+  ]);
 }
 
 export function composeTRS(trs: TRS): Mat4 {
   const q = normalizeQuat(trs.rotation);
   const s = trs.scale;
   const t = trs.translation;
-  const x2 = q.x + q.x; const y2 = q.y + q.y; const z2 = q.z + q.z;
-  const xx = q.x * x2; const xy = q.x * y2; const xz = q.x * z2;
-  const yy = q.y * y2; const yz = q.y * z2; const zz = q.z * z2;
-  const wx = q.w * x2; const wy = q.w * y2; const wz = q.w * z2;
+  const x2 = q.x + q.x;
+  const y2 = q.y + q.y;
+  const z2 = q.z + q.z;
+  const xx = q.x * x2;
+  const xy = q.x * y2;
+  const xz = q.x * z2;
+  const yy = q.y * y2;
+  const yz = q.y * z2;
+  const zz = q.z * z2;
+  const wx = q.w * x2;
+  const wy = q.w * y2;
+  const wz = q.w * z2;
   return mat4([
-    (1 - (yy + zz)) * s.x, (xy + wz) * s.x, (xz - wy) * s.x, 0,
-    (xy - wz) * s.y, (1 - (xx + zz)) * s.y, (yz + wx) * s.y, 0,
-    (xz + wy) * s.z, (yz - wx) * s.z, (1 - (xx + yy)) * s.z, 0,
-    t.x, t.y, t.z, 1,
+    (1 - (yy + zz)) * s.x,
+    (xy + wz) * s.x,
+    (xz - wy) * s.x,
+    0,
+    (xy - wz) * s.y,
+    (1 - (xx + zz)) * s.y,
+    (yz + wx) * s.y,
+    0,
+    (xz + wy) * s.z,
+    (yz - wx) * s.z,
+    (1 - (xx + yy)) * s.z,
+    0,
+    t.x,
+    t.y,
+    t.z,
+    1,
   ]);
 }
 
@@ -357,17 +449,19 @@ export function transformPoint(matrix: Mat4, point: Vec3): Vec3 {
   return vec3(
     (e[0] * point.x + e[4] * point.y + e[8] * point.z + e[12]) * iw,
     (e[1] * point.x + e[5] * point.y + e[9] * point.z + e[13]) * iw,
-    (e[2] * point.x + e[6] * point.y + e[10] * point.z + e[14]) * iw,
+    (e[2] * point.x + e[6] * point.y + e[10] * point.z + e[14]) * iw
   );
 }
 
 export function transformDirection(matrix: Mat4, direction: Vec3): Vec3 {
   const e = matrix.elements;
-  return normalizeVec3(vec3(
-    e[0] * direction.x + e[4] * direction.y + e[8] * direction.z,
-    e[1] * direction.x + e[5] * direction.y + e[9] * direction.z,
-    e[2] * direction.x + e[6] * direction.y + e[10] * direction.z,
-  ));
+  return normalizeVec3(
+    vec3(
+      e[0] * direction.x + e[4] * direction.y + e[8] * direction.z,
+      e[1] * direction.x + e[5] * direction.y + e[9] * direction.z,
+      e[2] * direction.x + e[6] * direction.y + e[10] * direction.z
+    )
+  );
 }
 
 export function intersectRayPlane(ray: Ray, plane: Plane): number | null {
@@ -421,7 +515,7 @@ function classifyAabbAgainstPlane(plane: Plane, aabb: AABB): boolean {
   const positive = vec3(
     plane.normal.x >= 0 ? aabb.max.x : aabb.min.x,
     plane.normal.y >= 0 ? aabb.max.y : aabb.min.y,
-    plane.normal.z >= 0 ? aabb.max.z : aabb.min.z,
+    plane.normal.z >= 0 ? aabb.max.z : aabb.min.z
   );
   return dotVec3(plane.normal, positive) + plane.constant >= 0;
 }
@@ -430,9 +524,17 @@ export function intersectFrustumAABB(frustum: Frustum, aabb: AABB): boolean {
   return frustum.planes.every((plane: Plane) => classifyAabbAgainstPlane(plane, aabb));
 }
 
-export function computePinchDistance(thumbTip: HandJointPose, indexTip: HandJointPose): number { return distanceVec3(thumbTip.position, indexTip.position); }
-export function computePalmForward(palm: HandJointPose, wrist: HandJointPose): Vec3 { return normalizeVec3(subVec3(palm.position, wrist.position)); }
-export function computeJointAngle(a: HandJointPose, joint: HandJointPose, b: HandJointPose): number {
+export function computePinchDistance(thumbTip: HandJointPose, indexTip: HandJointPose): number {
+  return distanceVec3(thumbTip.position, indexTip.position);
+}
+export function computePalmForward(palm: HandJointPose, wrist: HandJointPose): Vec3 {
+  return normalizeVec3(subVec3(palm.position, wrist.position));
+}
+export function computeJointAngle(
+  a: HandJointPose,
+  joint: HandJointPose,
+  b: HandJointPose
+): number {
   const v1 = normalizeVec3(subVec3(a.position, joint.position));
   const v2 = normalizeVec3(subVec3(b.position, joint.position));
   return Math.acos(clamp(dotVec3(v1, v2), -1, 1));
@@ -444,11 +546,15 @@ export function computeHandOpenness(joints: readonly HandJointPose[]): number {
   centroid = scaleVec3(centroid, 1 / joints.length);
   let totalDistance = 0;
   for (const joint of joints) totalDistance += distanceVec3(joint.position, centroid);
-  return clamp((totalDistance / joints.length) / 0.08, 0, 1);
+  return clamp(totalDistance / joints.length / 0.08, 0, 1);
 }
-function conjugateQuat(q: Quat): Quat { return quat(-q.x, -q.y, -q.z, q.w); }
+function conjugateQuat(q: Quat): Quat {
+  return quat(-q.x, -q.y, -q.z, q.w);
+}
 export function computePoseDelta(previousPose: HandJointPose, nextPose: HandJointPose): PoseDelta {
   const positionDelta = subVec3(nextPose.position, previousPose.position);
-  const rotationDelta = normalizeQuat(multiplyQuat(nextPose.rotation, conjugateQuat(normalizeQuat(previousPose.rotation))));
+  const rotationDelta = normalizeQuat(
+    multiplyQuat(nextPose.rotation, conjugateQuat(normalizeQuat(previousPose.rotation)))
+  );
   return Object.freeze({ positionDelta, rotationDelta });
 }

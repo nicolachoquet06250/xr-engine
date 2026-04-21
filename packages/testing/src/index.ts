@@ -1,8 +1,12 @@
 export type {
-    FrameDriver, MockGamepad,
-    TestEngine, TestFixture,
-    MockXRHand, MockXRController,
-    MockXRSession, TestHarness
+  FrameDriver,
+  MockGamepad,
+  TestEngine,
+  TestFixture,
+  MockXRHand,
+  MockXRController,
+  MockXRSession,
+  TestHarness,
 } from './testing';
 
 // Placeholder for testing package

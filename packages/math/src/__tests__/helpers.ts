@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { expect } from 'vitest';
 import type { Mat4, Quat, Vec2, Vec3 } from '../math';
 
 export const EPSILON = 1e-6;

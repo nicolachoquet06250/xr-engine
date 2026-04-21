@@ -22,13 +22,13 @@ export interface Time {
 }
 
 export type LifecycleState =
-    | 'created'
-    | 'initialized'
-    | 'mounted'
-    | 'running'
-    | 'paused'
-    | 'stopped'
-    | 'disposed';
+  | 'created'
+  | 'initialized'
+  | 'mounted'
+  | 'running'
+  | 'paused'
+  | 'stopped'
+  | 'disposed';
 
 export interface RuntimeContext {
   readonly time: Time;

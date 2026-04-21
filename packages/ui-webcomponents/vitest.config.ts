@@ -1,8 +1,8 @@
-import { createWorkspaceVitestConfig } from "../../configs/vitest/createWorkspaceVitestConfig";
+import { createWorkspaceVitestConfig } from '../../configs/vitest/createWorkspaceVitestConfig';
 
 export default createWorkspaceVitestConfig({
   workspaceDir: import.meta.dirname,
-  environment: "jsdom",
+  environment: 'jsdom',
   useVue: true,
-  name: "package-ui-webcomponents"
+  name: 'package-ui-webcomponents',
 });

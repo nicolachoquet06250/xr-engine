@@ -1,32 +1,32 @@
 export interface DebugSnapshot {
-    readonly timestamp: number;
-    readonly data: Record<string, unknown>;
+  readonly timestamp: number;
+  readonly data: Record<string, unknown>;
 }
 
 export interface EngineInspector {
-    captureSnapshot(): DebugSnapshot;
+  captureSnapshot(): DebugSnapshot;
 }
 
 export interface SceneInspector {
-    listEntities(): readonly string[];
+  listEntities(): readonly string[];
 }
 
 export interface PhysicsInspector {
-    listBodies(): readonly string[];
+  listBodies(): readonly string[];
 }
 
 export interface InputInspector {
-    getActionStates(): Readonly<Record<string, unknown>>;
+  getActionStates(): Readonly<Record<string, unknown>>;
 }
 
 export interface XRInspector {
-    getTrackingState(): unknown;
+  getTrackingState(): unknown;
 }
 
 export interface HandTrackingInspector {
-    getJointStates(): readonly unknown[];
+  getJointStates(): readonly unknown[];
 }
 
 export interface PerformancePanel {
-    getMetrics(): Readonly<Record<string, number>>;
+  getMetrics(): Readonly<Record<string, number>>;
 }

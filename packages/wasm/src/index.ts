@@ -1,8 +1,11 @@
 export type {
-    PhysicsBackendBridge, WasmBridge,
-    WasmAllocator, WasmHandle,
-    WasmMemoryView, WasmModuleInstance,
-    WasmModuleLoader
+  PhysicsBackendBridge,
+  WasmBridge,
+  WasmAllocator,
+  WasmHandle,
+  WasmMemoryView,
+  WasmModuleInstance,
+  WasmModuleLoader,
 } from './wasm';
 
 // Placeholder for wasm package

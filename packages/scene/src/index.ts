@@ -3,12 +3,18 @@
 // exports.  Consumers can import these types via
 // `@xr-engine/scene`.
 export type {
-    Component, Entity,
-    Scene, Transform,
-    Camera, Light,
-    ComponentType, EntityId,
-    LayerMask, TagSet,
-    SceneGraph, SceneNode
+  Component,
+  Entity,
+  Scene,
+  Transform,
+  Camera,
+  Light,
+  ComponentType,
+  EntityId,
+  LayerMask,
+  TagSet,
+  SceneGraph,
+  SceneNode,
 } from './scene.d.ts';
 
 // Scene package public API.  Only type exports are provided here

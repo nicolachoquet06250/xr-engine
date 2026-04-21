@@ -1,8 +1,15 @@
 export type {
-    AssetCache, AssetHandle, AssetManager,
-    AssetLoader, AudioAsset, MeshAsset,
-    SceneAsset, ShaderAsset, AssetManifest,
-    TextureAsset, AssetDescriptor
+  AssetCache,
+  AssetHandle,
+  AssetManager,
+  AssetLoader,
+  AudioAsset,
+  MeshAsset,
+  SceneAsset,
+  ShaderAsset,
+  AssetManifest,
+  TextureAsset,
+  AssetDescriptor,
 } from './assets';
 
 // Placeholder for assets package

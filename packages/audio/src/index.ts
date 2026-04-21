@@ -1,8 +1,12 @@
 export type {
-    AudioClip, AudioBus,
-    AudioSource, AudioSourceState,
-    AudioListener, AudioSystem,
-    AudioPlaybackHandle, SpatialAudioConfig
+  AudioClip,
+  AudioBus,
+  AudioSource,
+  AudioSourceState,
+  AudioListener,
+  AudioSystem,
+  AudioPlaybackHandle,
+  SpatialAudioConfig,
 } from './audio';
 
 // Placeholder for audio package

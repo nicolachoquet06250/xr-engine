@@ -59,12 +59,7 @@ describe('Mat4 operations', () => {
   });
 
   it('transposes matrices', () => {
-    const source = mat4([
-      1, 2, 3, 4,
-      5, 6, 7, 8,
-      9, 10, 11, 12,
-      13, 14, 15, 16,
-    ]);
+    const source = mat4([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
 
     const transposed = transposeMat4(source);
     expect(transposed.elements[1]).toBe(5);

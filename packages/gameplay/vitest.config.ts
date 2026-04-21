@@ -1,8 +1,8 @@
-import { createWorkspaceVitestConfig } from "../../configs/vitest/createWorkspaceVitestConfig";
+import { createWorkspaceVitestConfig } from '../../configs/vitest/createWorkspaceVitestConfig';
 
 export default createWorkspaceVitestConfig({
   workspaceDir: import.meta.dirname,
-  environment: "node",
+  environment: 'node',
   useVue: false,
-  name: "package-gameplay"
+  name: 'package-gameplay',
 });

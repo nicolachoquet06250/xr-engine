@@ -16,16 +16,16 @@ Le projet doit être défini comme :
 
 Le moteur doit couvrir :
 
-* rendu 3D
-* scène et entités
-* moteur physique intégré
-* abstraction d’input
-* support WebXR
-* support hand tracking
-* Web Components en Vue 3
-* API gameplay
-* pipeline de tests
-* intégration WebAssembly pour les zones critiques
+- rendu 3D
+- scène et entités
+- moteur physique intégré
+- abstraction d’input
+- support WebXR
+- support hand tracking
+- Web Components en Vue 3
+- API gameplay
+- pipeline de tests
+- intégration WebAssembly pour les zones critiques
 
 ### 1.2 Modes d’interaction à supporter
 
@@ -33,50 +33,50 @@ Le moteur doit fonctionner dans les modes suivants :
 
 #### Mode desktop
 
-* clavier
-* souris
-* gamepad
+- clavier
+- souris
+- gamepad
 
 #### Mode XR avec contrôleurs
 
-* contrôleur gauche
-* contrôleur droit
-* ray interaction
-* grip / trigger / thumbstick / boutons
+- contrôleur gauche
+- contrôleur droit
+- ray interaction
+- grip / trigger / thumbstick / boutons
 
 #### Mode XR avec hand tracking
 
-* main gauche
-* main droite
-* joints
-* pinch
-* poke
-* near interaction
-* fallback si certaines capacités manquent
+- main gauche
+- main droite
+- joints
+- pinch
+- poke
+- near interaction
+- fallback si certaines capacités manquent
 
 ### 1.3 Principe d’abstraction fondamental
 
 Le gameplay ne doit jamais dépendre directement :
 
-* d’un clavier
-* d’une manette
-* d’un contrôleur XR
-* d’une main trackée
+- d’un clavier
+- d’une manette
+- d’un contrôleur XR
+- d’une main trackée
 
 Le gameplay doit dépendre d’**intentions** :
 
-* move
-* look
-* jump
-* grab
-* use
-* teleport
-* menu
-* pinch
-* poke
-* select
-* confirm
-* cancel
+- move
+- look
+- jump
+- grab
+- use
+- teleport
+- menu
+- pinch
+- poke
+- select
+- confirm
+- cancel
 
 ---
 
@@ -86,35 +86,35 @@ Le gameplay doit dépendre d’**intentions** :
 
 Tout le projet doit utiliser :
 
-* **TypeScript**
-* **Vite**
-* **Vitest**
-* **Vue 3 Composition API**
-* **Web Components**
-* **WebAssembly** pour les parties critiques
+- **TypeScript**
+- **Vite**
+- **Vitest**
+- **Vue 3 Composition API**
+- **Web Components**
+- **WebAssembly** pour les parties critiques
 
 ### 2.2 Contraintes d’architecture
 
 Tu dois imposer les règles suivantes :
 
-* le cœur moteur ne dépend pas de Vue
-* l’UI ne contient pas la logique métier centrale
-* la physique ne dépend pas de l’UI
-* le gameplay dépend d’interfaces stables
-* WebAssembly est encapsulé derrière des APIs TypeScript
-* toute fonctionnalité importante doit être testée
+- le cœur moteur ne dépend pas de Vue
+- l’UI ne contient pas la logique métier centrale
+- la physique ne dépend pas de l’UI
+- le gameplay dépend d’interfaces stables
+- WebAssembly est encapsulé derrière des APIs TypeScript
+- toute fonctionnalité importante doit être testée
 
 ### 2.3 Exigences de qualité
 
 Le moteur doit être :
 
-* modulaire
-* testable
-* documenté
-* extensible
-* capable de dégradation progressive
-* indépendant d’un seul périphérique XR
-* indépendant d’un seul backend physique
+- modulaire
+- testable
+- documenté
+- extensible
+- capable de dégradation progressive
+- indépendant d’un seul périphérique XR
+- indépendant d’un seul backend physique
 
 ---
 
@@ -126,191 +126,191 @@ L’architecture doit être organisée en couches fonctionnelles.
 
 Responsabilités :
 
-* boucle moteur
-* gestion du temps
-* lifecycle
-* scheduling
-* orchestration des systèmes
-* événements globaux
-* état global du runtime
+- boucle moteur
+- gestion du temps
+- lifecycle
+- scheduling
+- orchestration des systèmes
+- événements globaux
+- état global du runtime
 
 ### 3.2 Couche Math
 
 Responsabilités :
 
-* vecteurs
-* matrices
-* quaternions
-* géométrie
-* intersections
-* volumes
-* helpers pour physique, rendu, XR et hand tracking
+- vecteurs
+- matrices
+- quaternions
+- géométrie
+- intersections
+- volumes
+- helpers pour physique, rendu, XR et hand tracking
 
 ### 3.3 Couche Scene
 
 Responsabilités :
 
-* entités
-* hiérarchie
-* transforms
-* caméras
-* lights
-* layers
-* activation/destruction
+- entités
+- hiérarchie
+- transforms
+- caméras
+- lights
+- layers
+- activation/destruction
 
 ### 3.4 Couche Renderer
 
 Responsabilités :
 
-* abstraction graphique
-* shaders
-* materials
-* meshes
-* textures
-* passes de rendu
-* pipeline XR
+- abstraction graphique
+- shaders
+- materials
+- meshes
+- textures
+- passes de rendu
+- pipeline XR
 
 ### 3.5 Couche Physics
 
 Responsabilités :
 
-* rigid bodies
-* colliders
-* raycasts
-* overlaps
-* triggers
-* world stepping
-* synchronisation scène ↔ physique
+- rigid bodies
+- colliders
+- raycasts
+- overlaps
+- triggers
+- world stepping
+- synchronisation scène ↔ physique
 
 ### 3.6 Couche Input
 
 Responsabilités :
 
-* clavier/souris
-* gamepad
-* contrôleurs XR
-* mains XR
-* normalisation des signaux
-* mapping vers actions
+- clavier/souris
+- gamepad
+- contrôleurs XR
+- mains XR
+- normalisation des signaux
+- mapping vers actions
 
 ### 3.7 Couche XR
 
 Responsabilités :
 
-* session WebXR
-* tracking tête / contrôleurs / mains
-* capacités XR
-* reference spaces
-* mode controllers / hands
-* fallback XR
+- session WebXR
+- tracking tête / contrôleurs / mains
+- capacités XR
+- reference spaces
+- mode controllers / hands
+- fallback XR
 
 ### 3.8 Couche Interaction
 
 Responsabilités :
 
-* ray interaction
-* near interaction
-* grab
-* poke
-* pinch
-* interaction UI
-* teleportation
+- ray interaction
+- near interaction
+- grab
+- poke
+- pinch
+- interaction UI
+- teleportation
 
 ### 3.9 Couche Audio
 
 Responsabilités :
 
-* sources audio
-* listener
-* spatialisation
-* lecture/arrêt/boucle
-* feedback sonore interaction
+- sources audio
+- listener
+- spatialisation
+- lecture/arrêt/boucle
+- feedback sonore interaction
 
 ### 3.10 Couche Assets
 
 Responsabilités :
 
-* chargement d’assets
-* cache
-* textures
-* meshes
-* matériaux
-* audio
-* scènes
-* manifests
+- chargement d’assets
+- cache
+- textures
+- meshes
+- matériaux
+- audio
+- scènes
+- manifests
 
 ### 3.11 Couche UI Core
 
 Responsabilités :
 
-* primitives UI moteur
-* modèle d’état UI
-* focus
-* routing UI interne si nécessaire
-* bridge entre runtime et composants d’affichage
+- primitives UI moteur
+- modèle d’état UI
+- focus
+- routing UI interne si nécessaire
+- bridge entre runtime et composants d’affichage
 
 ### 3.12 Couche UI WebComponents
 
 Responsabilités :
 
-* composants Vue 3 custom elements
-* encapsulation du moteur
-* overlays
-* HUD
-* outils d’inspection exposés au DOM
+- composants Vue 3 custom elements
+- encapsulation du moteur
+- overlays
+- HUD
+- outils d’inspection exposés au DOM
 
 ### 3.13 Couche Gameplay
 
 Responsabilités :
 
-* scripts de haut niveau
-* logique de jeu
-* interactions métier
-* règles de gameplay
-* helpers de spawning
-* patterns de gameplay réutilisables
+- scripts de haut niveau
+- logique de jeu
+- interactions métier
+- règles de gameplay
+- helpers de spawning
+- patterns de gameplay réutilisables
 
 ### 3.14 Couche Devtools
 
 Responsabilités :
 
-* inspection runtime
-* stats
-* profiling léger
-* visualisation input/XR/hands
-* arbre de scène
-* debug physique
+- inspection runtime
+- stats
+- profiling léger
+- visualisation input/XR/hands
+- arbre de scène
+- debug physique
 
 ### 3.15 Couche Testing
 
 Responsabilités :
 
-* mocks
-* fixtures
-* helpers de test
-* test harness runtime
-* simulation d’inputs et d’états XR
+- mocks
+- fixtures
+- helpers de test
+- test harness runtime
+- simulation d’inputs et d’états XR
 
 ### 3.16 Couche WASM
 
 Responsabilités :
 
-* backend natif / wasm
-* calculs intensifs
-* physique
-* collision
-* potentiellement pathfinding plus tard
-* contrats mémoire / handles
+- backend natif / wasm
+- calculs intensifs
+- physique
+- collision
+- potentiellement pathfinding plus tard
+- contrats mémoire / handles
 
 ### 3.17 Couche Examples
 
 Responsabilités :
 
-* scènes de démonstration
-* cas d’usage minimaux
-* validation fonctionnelle
-* exemples d’intégration
-* exemples de modes d’input
+- scènes de démonstration
+- cas d’usage minimaux
+- validation fonctionnelle
+- exemples d’intégration
+- exemples de modes d’input
 
 ---
 
@@ -354,45 +354,45 @@ configs/
 
 Les packages MVP doivent être :
 
-* `@engine/core`
-* `@engine/math`
-* `@engine/scene`
-* `@engine/renderer`
-* `@engine/physics`
-* `@engine/input`
-* `@engine/xr`
-* `@engine/interaction`
-* `@engine/audio`
-* `@engine/assets`
-* `@engine/gameplay`
-* `@engine/ui-core`
-* `@engine/ui-webcomponents`
-* `@engine/devtools`
-* `@engine/testing`
-* `@engine/wasm`
-* `@engine/examples`
+- `@engine/core`
+- `@engine/math`
+- `@engine/scene`
+- `@engine/renderer`
+- `@engine/physics`
+- `@engine/input`
+- `@engine/xr`
+- `@engine/interaction`
+- `@engine/audio`
+- `@engine/assets`
+- `@engine/gameplay`
+- `@engine/ui-core`
+- `@engine/ui-webcomponents`
+- `@engine/devtools`
+- `@engine/testing`
+- `@engine/wasm`
+- `@engine/examples`
 
 ### 4.3 Règles de dépendances
 
 Tu dois fixer une direction stricte :
 
-* `math` est bas niveau
-* `core` est très bas niveau
-* `scene` dépend de `math` et `core`
-* `renderer` dépend de `scene`, `math`, `core`
-* `physics` dépend de `math`, `core`, `wasm`
-* `input` dépend de `core`
-* `xr` dépend de `core`, `scene`, `input`, `math`
-* `interaction` dépend de `input`, `xr`, `scene`, `physics`
-* `audio` dépend de `scene`, `math`, `core`
-* `assets` dépend de `core`
-* `gameplay` dépend des APIs publiques moteur
-* `ui-core` dépend de `core`
-* `ui-webcomponents` dépend de `ui-core` et des APIs publiques moteur
-* `devtools` dépend des APIs publiques et d’outils d’inspection
-* `testing` dépend de tous les packages testés, sans dépendances inverses
-* `examples` dépend des APIs publiques
-* `wasm` ne doit pas imposer sa structure interne aux autres packages
+- `math` est bas niveau
+- `core` est très bas niveau
+- `scene` dépend de `math` et `core`
+- `renderer` dépend de `scene`, `math`, `core`
+- `physics` dépend de `math`, `core`, `wasm`
+- `input` dépend de `core`
+- `xr` dépend de `core`, `scene`, `input`, `math`
+- `interaction` dépend de `input`, `xr`, `scene`, `physics`
+- `audio` dépend de `scene`, `math`, `core`
+- `assets` dépend de `core`
+- `gameplay` dépend des APIs publiques moteur
+- `ui-core` dépend de `core`
+- `ui-webcomponents` dépend de `ui-core` et des APIs publiques moteur
+- `devtools` dépend des APIs publiques et d’outils d’inspection
+- `testing` dépend de tous les packages testés, sans dépendances inverses
+- `examples` dépend des APIs publiques
+- `wasm` ne doit pas imposer sa structure interne aux autres packages
 
 ---
 
@@ -404,214 +404,214 @@ Avant de développer, il faut écrire les interfaces publiques.
 
 Responsabilités publiques :
 
-* `Engine`
-* `EngineConfig`
-* `RuntimeContext`
-* `LifecycleHook`
-* `Engine.start()`
-* `Engine.stop()`
-* `Engine.pause()`
-* `Engine.resume()`
-* `Engine.mount()`
+- `Engine`
+- `EngineConfig`
+- `RuntimeContext`
+- `LifecycleHook`
+- `Engine.start()`
+- `Engine.stop()`
+- `Engine.pause()`
+- `Engine.resume()`
+- `Engine.mount()`
 
 ### 5.2 API `math`
 
 Responsabilités publiques :
 
-* `Vec2`
-* `Vec3`
-* `Vec4`
-* `Quat`
-* `Mat3`
-* `Mat4`
-* `Ray`
-* `Plane`
-* `AABB`
-* `Sphere`
-* `Frustum`
-* helpers d’intersections
-* helpers de calcul hand tracking
+- `Vec2`
+- `Vec3`
+- `Vec4`
+- `Quat`
+- `Mat3`
+- `Mat4`
+- `Ray`
+- `Plane`
+- `AABB`
+- `Sphere`
+- `Frustum`
+- helpers d’intersections
+- helpers de calcul hand tracking
 
 ### 5.3 API `scene`
 
 Responsabilités publiques :
 
-* `Scene`
-* `Entity`
-* `Component`
-* `Transform`
-* `Camera`
-* `Light`
-* `SceneNode`
-* `SceneGraph`
+- `Scene`
+- `Entity`
+- `Component`
+- `Transform`
+- `Camera`
+- `Light`
+- `SceneNode`
+- `SceneGraph`
 
 ### 5.4 API `renderer`
 
 Responsabilités publiques :
 
-* `Renderer`
-* `RenderTarget`
-* `Mesh`
-* `Material`
-* `Texture`
-* `ShaderProgram`
-* `RenderPass`
+- `Renderer`
+- `RenderTarget`
+- `Mesh`
+- `Material`
+- `Texture`
+- `ShaderProgram`
+- `RenderPass`
 
 ### 5.5 API `physics`
 
 Responsabilités publiques :
 
-* `PhysicsWorld`
-* `RigidBody`
-* `Collider`
-* `CharacterController`
-* `RaycastHit`
-* `CollisionEvent`
-* `TriggerEvent`
+- `PhysicsWorld`
+- `RigidBody`
+- `Collider`
+- `CharacterController`
+- `RaycastHit`
+- `CollisionEvent`
+- `TriggerEvent`
 
 ### 5.6 API `input`
 
 Responsabilités publiques :
 
-* `InputSystem`
-* `InputAction`
-* `InputBinding`
-* `InputProfile`
-* `InputContext`
-* `InputDeviceAdapter`
+- `InputSystem`
+- `InputAction`
+- `InputBinding`
+- `InputProfile`
+- `InputContext`
+- `InputDeviceAdapter`
 
 ### 5.7 API `xr`
 
 Responsabilités publiques :
 
-* `XRManager`
-* `XRSessionState`
-* `XRControllerState`
-* `XRHandState`
-* `XRTrackingCapabilities`
-* `XRReferenceSpaceState`
+- `XRManager`
+- `XRSessionState`
+- `XRControllerState`
+- `XRHandState`
+- `XRTrackingCapabilities`
+- `XRReferenceSpaceState`
 
 ### 5.8 API `interaction`
 
 Responsabilités publiques :
 
-* `Interactor`
-* `RayInteractor`
-* `GrabInteractor`
-* `PokeInteractor`
-* `PinchInteractor`
-* `TeleportInteractor`
-* `UIInteractor`
-* `Interactable`
+- `Interactor`
+- `RayInteractor`
+- `GrabInteractor`
+- `PokeInteractor`
+- `PinchInteractor`
+- `TeleportInteractor`
+- `UIInteractor`
+- `Interactable`
 
 ### 5.9 API `audio`
 
 Responsabilités publiques :
 
-* `AudioSystem`
-* `AudioListener`
-* `AudioSource`
-* `SpatialAudioConfig`
-* `AudioClip`
-* `AudioBus`
-* `AudioPlaybackHandle`
+- `AudioSystem`
+- `AudioListener`
+- `AudioSource`
+- `SpatialAudioConfig`
+- `AudioClip`
+- `AudioBus`
+- `AudioPlaybackHandle`
 
 ### 5.10 API `assets`
 
 Responsabilités publiques :
 
-* `AssetManager`
-* `AssetLoader`
-* `AssetHandle`
-* `AssetManifest`
-* `AssetCache`
-* `MeshAsset`
-* `TextureAsset`
-* `AudioAsset`
-* `SceneAsset`
+- `AssetManager`
+- `AssetLoader`
+- `AssetHandle`
+- `AssetManifest`
+- `AssetCache`
+- `MeshAsset`
+- `TextureAsset`
+- `AudioAsset`
+- `SceneAsset`
 
 ### 5.11 API `gameplay`
 
 Responsabilités publiques :
 
-* `GameplaySystem`
-* `GameplayContext`
-* `SpawnService`
-* `GameState`
-* `InteractionRule`
-* `ScriptBehaviour`
-* helpers de logique réutilisable
+- `GameplaySystem`
+- `GameplayContext`
+- `SpawnService`
+- `GameState`
+- `InteractionRule`
+- `ScriptBehaviour`
+- helpers de logique réutilisable
 
 ### 5.12 API `ui-core`
 
 Responsabilités publiques :
 
-* `UIStateStore`
-* `UIEventBus`
-* `UIFocusManager`
-* `UIActionDispatcher`
-* `UINodeModel`
-* `UIPanelState`
+- `UIStateStore`
+- `UIEventBus`
+- `UIFocusManager`
+- `UIActionDispatcher`
+- `UINodeModel`
+- `UIPanelState`
 
 ### 5.13 API `ui-webcomponents`
 
 Responsabilités publiques :
 
-* `<xr-engine>`
-* `<xr-scene>`
-* `<xr-camera>`
-* `<xr-entity>`
-* `<xr-hud>`
-* `<xr-debug-panel>`
-* `<xr-hand-debug>`
-* `<xr-input-profile-viewer>`
+- `<xr-engine>`
+- `<xr-scene>`
+- `<xr-camera>`
+- `<xr-entity>`
+- `<xr-hud>`
+- `<xr-debug-panel>`
+- `<xr-hand-debug>`
+- `<xr-input-profile-viewer>`
 
 ### 5.14 API `devtools`
 
 Responsabilités publiques :
 
-* `EngineInspector`
-* `SceneInspector`
-* `PhysicsInspector`
-* `InputInspector`
-* `XRInspector`
-* `HandTrackingInspector`
-* `PerformancePanel`
+- `EngineInspector`
+- `SceneInspector`
+- `PhysicsInspector`
+- `InputInspector`
+- `XRInspector`
+- `HandTrackingInspector`
+- `PerformancePanel`
 
 ### 5.15 API `testing`
 
 Responsabilités publiques :
 
-* `createTestEngine()`
-* `createMockScene()`
-* `createMockXRSession()`
-* `createMockXRHand()`
-* `createMockGamepad()`
-* `tickEngine()`
-* `renderFrame()`
-* fixtures de scène et d’input
+- `createTestEngine()`
+- `createMockScene()`
+- `createMockXRSession()`
+- `createMockXRHand()`
+- `createMockGamepad()`
+- `tickEngine()`
+- `renderFrame()`
+- fixtures de scène et d’input
 
 ### 5.16 API `wasm`
 
 Responsabilités publiques :
 
-* `WasmModuleLoader`
-* `PhysicsBackendBridge`
-* `WasmHandle`
-* `WasmMemoryView`
-* contrats d’allocation/libération
-* adaptateurs TS ↔ WASM
+- `WasmModuleLoader`
+- `PhysicsBackendBridge`
+- `WasmHandle`
+- `WasmMemoryView`
+- contrats d’allocation/libération
+- adaptateurs TS ↔ WASM
 
 ### 5.17 API `examples`
 
 Responsabilités publiques :
 
-* exemples exécutable desktop
-* exemples XR controllers
-* exemples hand tracking
-* exemples UI
-* exemples intégration Web Components
-* exemples de fallback capability
+- exemples exécutable desktop
+- exemples XR controllers
+- exemples hand tracking
+- exemples UI
+- exemples intégration Web Components
+- exemples de fallback capability
 
 ---
 
@@ -623,24 +623,24 @@ Le moteur doit être capability-driven.
 
 Le runtime doit savoir exposer :
 
-* support WebXR
-* support immersive VR
-* support gamepad
-* support contrôleurs XR
-* support hand tracking
-* support hand joints
-* support haptics
-* support ray interaction
-* support near interaction
+- support WebXR
+- support immersive VR
+- support gamepad
+- support contrôleurs XR
+- support hand tracking
+- support hand joints
+- support haptics
+- support ray interaction
+- support near interaction
 
 ### 6.2 Fallbacks
 
 Tu dois prévoir les transitions suivantes :
 
-* hand tracking indisponible → contrôleurs XR
-* contrôleurs indisponibles → desktop
-* tracking perdu → mode safe/fallback
-* interaction lointaine indisponible → UI de proximité ou alternative
+- hand tracking indisponible → contrôleurs XR
+- contrôleurs indisponibles → desktop
+- tracking perdu → mode safe/fallback
+- interaction lointaine indisponible → UI de proximité ou alternative
 
 ### 6.3 Règle de conception
 
@@ -654,56 +654,56 @@ Aucune mécanique principale ne doit dépendre exclusivement d’un seul device.
 
 Initialise :
 
-* monorepo
-* TypeScript strict
-* Vite
-* Vitest
-* lint
-* formatage
-* CI
-* scripts workspace
+- monorepo
+- TypeScript strict
+- Vite
+- Vitest
+- lint
+- formatage
+- CI
+- scripts workspace
 
 ### 7.2 Configuration TypeScript
 
 Prévoir :
 
-* project references
-* alias de packages
-* strict mode fort
-* builds incrémentaux
-* séparation nette `src` / `tests`
+- project references
+- alias de packages
+- strict mode fort
+- builds incrémentaux
+- séparation nette `src` / `tests`
 
 ### 7.3 Configuration Vite
 
 Prévoir :
 
-* mode lib pour les packages
-* mode app pour sandbox/playground
-* résolution workspace
-* build examples
-* build custom elements
+- mode lib pour les packages
+- mode app pour sandbox/playground
+- résolution workspace
+- build examples
+- build custom elements
 
 ### 7.4 Configuration Vitest
 
 Prévoir :
 
-* unit tests
-* integration tests
-* browser-like tests
-* coverage
-* setup files
-* mocks XR/canvas/gamepad
+- unit tests
+- integration tests
+- browser-like tests
+- coverage
+- setup files
+- mocks XR/canvas/gamepad
 
 ### 7.5 CI/CD
 
 Pipeline minimal :
 
-* lint
-* typecheck
-* tests
-* build
-* coverage
-* publication preview/canary plus tard
+- lint
+- typecheck
+- tests
+- build
+- coverage
+- publication preview/canary plus tard
 
 ---
 
@@ -713,26 +713,26 @@ Pipeline minimal :
 
 Implémenter :
 
-* `Vec2`
-* `Vec3`
-* `Vec4`
-* `Quat`
-* `Mat3`
-* `Mat4`
-* `Ray`
-* `Plane`
-* `Sphere`
-* `AABB`
-* `Frustum`
+- `Vec2`
+- `Vec3`
+- `Vec4`
+- `Quat`
+- `Mat3`
+- `Mat4`
+- `Ray`
+- `Plane`
+- `Sphere`
+- `AABB`
+- `Frustum`
 
 ### 8.2 Fonctions
 
-* transformations
-* projections
-* intersections
-* bounding volumes
-* calculs spatiaux XR
-* utilitaires pour joints de mains
+- transformations
+- projections
+- intersections
+- bounding volumes
+- calculs spatiaux XR
+- utilitaires pour joints de mains
 
 ### 8.3 Tests
 
@@ -746,36 +746,36 @@ Ce package doit être fortement couvert.
 
 Le runtime doit séparer :
 
-* update logique
-* update input
-* update XR
-* step physique
-* rendu
+- update logique
+- update input
+- update XR
+- step physique
+- rendu
 
 ### 9.2 Temps
 
-* delta time
-* fixed time step
-* frame count
-* pause/resume
-* time scaling
+- delta time
+- fixed time step
+- frame count
+- pause/resume
+- time scaling
 
 ### 9.3 Système d’événements
 
 Catégories :
 
-* lifecycle
-* input
-* XR
-* collisions
-* interaction
-* UI
+- lifecycle
+- input
+- XR
+- collisions
+- interaction
+- UI
 
 ### 9.4 Gestion des ressources runtime
 
-* enregistrement des systèmes
-* accès services
-* dépendances internes
+- enregistrement des systèmes
+- accès services
+- dépendances internes
 
 ---
 
@@ -785,31 +785,31 @@ Catégories :
 
 Utiliser un hybride :
 
-* scene graph pour hiérarchie/transforms
-* composants/systèmes pour logique
+- scene graph pour hiérarchie/transforms
+- composants/systèmes pour logique
 
 ### 10.2 Composants MVP
 
-* `TransformComponent`
-* `CameraComponent`
-* `MeshComponent`
-* `LightComponent`
-* `RigidBodyComponent`
-* `ColliderComponent`
-* `AudioSourceComponent`
-* `InteractableComponent`
-* `HandInteractableComponent`
+- `TransformComponent`
+- `CameraComponent`
+- `MeshComponent`
+- `LightComponent`
+- `RigidBodyComponent`
+- `ColliderComponent`
+- `AudioSourceComponent`
+- `InteractableComponent`
+- `HandInteractableComponent`
 
 ### 10.3 Systèmes MVP
 
-* `TransformSystem`
-* `RenderSystem`
-* `PhysicsSystem`
-* `InputSystem`
-* `XRSystem`
-* `InteractionSystem`
-* `AudioSystem`
-* `UISystem`
+- `TransformSystem`
+- `RenderSystem`
+- `PhysicsSystem`
+- `InputSystem`
+- `XRSystem`
+- `InteractionSystem`
+- `AudioSystem`
+- `UISystem`
 
 ---
 
@@ -817,31 +817,31 @@ Utiliser un hybride :
 
 ### 11.1 Milestone 1
 
-* canvas
-* clear color
-* triangle
-* cube
-* caméra perspective
+- canvas
+- clear color
+- triangle
+- cube
+- caméra perspective
 
 ### 11.2 Milestone 2
 
-* meshes
-* materials
-* textures
-* depth test
-* resize
+- meshes
+- materials
+- textures
+- depth test
+- resize
 
 ### 11.3 Milestone 3
 
-* lumière de base
-* culling
-* instancing
+- lumière de base
+- culling
+- instancing
 
 ### 11.4 Support XR
 
-* vues stéréoscopiques
-* caméras XR
-* matrices XR
+- vues stéréoscopiques
+- caméras XR
+- matrices XR
 
 ---
 
@@ -853,28 +853,28 @@ Créer une abstraction de backend stable.
 
 ### 12.2 Fonctionnalités MVP
 
-* rigid bodies
-* colliders
-* gravity
-* raycasts
-* triggers
-* restitution / friction
+- rigid bodies
+- colliders
+- gravity
+- raycasts
+- triggers
+- restitution / friction
 
 ### 12.3 Fonctionnalités phase 2
 
-* character controller
-* joints
-* CCD
-* contraintes avancées
+- character controller
+- joints
+- CCD
+- contraintes avancées
 
 ### 12.4 Hand interaction et physique
 
 Prévoir :
 
-* overlaps de proximité
-* poke volumes
-* cibles de pinch
-* proxys kinematic plus tard si nécessaire
+- overlaps de proximité
+- poke volumes
+- cibles de pinch
+- proxys kinematic plus tard si nécessaire
 
 ---
 
@@ -895,40 +895,40 @@ Raw device state
 
 ### 13.2 Devices à supporter
 
-* keyboard
-* mouse
-* gamepad
-* xr-controller-left
-* xr-controller-right
-* xr-hand-left
-* xr-hand-right
+- keyboard
+- mouse
+- gamepad
+- xr-controller-left
+- xr-controller-right
+- xr-hand-left
+- xr-hand-right
 
 ### 13.3 Signaux normalisés
 
-* bouton
-* axe
-* pose
-* ray
-* grab state
-* pinch state
-* poke state
-* tracking validity
+- bouton
+- axe
+- pose
+- ray
+- grab state
+- pinch state
+- poke state
+- tracking validity
 
 ### 13.4 Actions
 
-* move
-* look
-* jump
-* grab
-* release
-* use
-* teleport
-* menu
-* select
-* cancel
-* pinch
-* poke
-* uiPress
+- move
+- look
+- jump
+- grab
+- release
+- use
+- teleport
+- menu
+- select
+- cancel
+- pinch
+- poke
+- uiPress
 
 ---
 
@@ -936,36 +936,36 @@ Raw device state
 
 ### 14.1 Gestion de session
 
-* détection support
-* entrée/sortie session
-* reference spaces
-* frame loop XR
+- détection support
+- entrée/sortie session
+- reference spaces
+- frame loop XR
 
 ### 14.2 Tracking state
 
-* head pose
-* controller states
-* hand states
-* validité tracking
-* changements de mode
+- head pose
+- controller states
+- hand states
+- validité tracking
+- changements de mode
 
 ### 14.3 Support hand tracking
 
-* joints runtime
-* pinch
-* poke
-* palm orientation
-* near targeting
-* ray fallback
+- joints runtime
+- pinch
+- poke
+- palm orientation
+- near targeting
+- ray fallback
 
 ### 14.4 Bascule entre modes
 
 Prévoir :
 
-* controllers only
-* hands only
-* mixed support
-* perte temporaire de tracking
+- controllers only
+- hands only
+- mixed support
+- perte temporaire de tracking
 
 ---
 
@@ -973,24 +973,24 @@ Prévoir :
 
 ### 15.1 Types d’interaction
 
-* far interaction
-* near interaction
-* grab
-* UI interaction
-* locomotion interaction
+- far interaction
+- near interaction
+- grab
+- UI interaction
+- locomotion interaction
 
 ### 15.2 Contrôleurs XR
 
-* ray pointer
-* grip grab
-* trigger use
+- ray pointer
+- grip grab
+- trigger use
 
 ### 15.3 Hand tracking
 
-* pinch select
-* poke UI
-* near grab
-* ray fallback si nécessaire
+- pinch select
+- poke UI
+- near grab
+- ray fallback si nécessaire
 
 ### 15.4 Règle de gameplay
 
@@ -1002,26 +1002,26 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ### 16.1 MVP audio
 
-* listener
-* audio source 3D
-* play/stop/pause
-* loop
-* volume
-* distance attenuation
+- listener
+- audio source 3D
+- play/stop/pause
+- loop
+- volume
+- distance attenuation
 
 ### 16.2 Intégration gameplay
 
-* feedback de grab
-* feedback de poke
-* feedback de menu
-* ambiance de scène
+- feedback de grab
+- feedback de poke
+- feedback de menu
+- ambiance de scène
 
 ### 16.3 Phase 2
 
-* mixers
-* buses
-* spatialisation avancée
-* effets
+- mixers
+- buses
+- spatialisation avancée
+- effets
 
 ---
 
@@ -1029,29 +1029,29 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ### 17.1 Types d’assets
 
-* mesh
-* texture
-* material config
-* audio
-* scène
-* shaders
-* manifests
-* configs d’input
+- mesh
+- texture
+- material config
+- audio
+- scène
+- shaders
+- manifests
+- configs d’input
 
 ### 17.2 Pipeline d’assets
 
-* chargement async
-* cache
-* fallback
-* préchargement
-* invalidation
+- chargement async
+- cache
+- fallback
+- préchargement
+- invalidation
 
 ### 17.3 Phase 2
 
-* glTF
-* compression
-* streaming
-* manifests avancés
+- glTF
+- compression
+- streaming
+- manifests avancés
 
 ---
 
@@ -1063,18 +1063,18 @@ La couche gameplay sert à écrire la logique métier sans dépendre des détail
 
 ### 18.2 Contenu
 
-* services de spawn
-* game state
-* règles de sélection
-* scripts de comportement
-* interactions métier
-* aides à la composition d’objets de jeu
+- services de spawn
+- game state
+- règles de sélection
+- scripts de comportement
+- interactions métier
+- aides à la composition d’objets de jeu
 
 ### 18.3 Règles
 
-* dépend des APIs publiques uniquement
-* aucune dépendance aux détails WASM
-* aucune dépendance au DOM
+- dépend des APIs publiques uniquement
+- aucune dépendance aux détails WASM
+- aucune dépendance au DOM
 
 ---
 
@@ -1086,19 +1086,19 @@ Créer une base UI indépendante du framework d’affichage final.
 
 ### 19.2 Contenu
 
-* état UI
-* focus
-* navigation
-* dispatch d’actions UI
-* modèles de panneaux
-* état overlays/debug/menu
+- état UI
+- focus
+- navigation
+- dispatch d’actions UI
+- modèles de panneaux
+- état overlays/debug/menu
 
 ### 19.3 Rôle
 
 Cette couche sert de pont entre :
 
-* le runtime moteur
-* les composants Vue/Web Components
+- le runtime moteur
+- les composants Vue/Web Components
 
 ---
 
@@ -1110,23 +1110,23 @@ Exposer le moteur via des composants Vue 3 custom elements.
 
 ### 20.2 Composants principaux
 
-* `<xr-engine>`
-* `<xr-scene>`
-* `<xr-camera>`
-* `<xr-entity>`
-* `<xr-hud>`
-* `<xr-debug-panel>`
-* `<xr-hand-debug>`
-* `<xr-input-profile-viewer>`
+- `<xr-engine>`
+- `<xr-scene>`
+- `<xr-camera>`
+- `<xr-entity>`
+- `<xr-hud>`
+- `<xr-debug-panel>`
+- `<xr-hand-debug>`
+- `<xr-input-profile-viewer>`
 
 ### 20.3 Contrat
 
 Chaque composant doit exposer :
 
-* props typées
-* `CustomEvent`
-* méthodes publiques éventuelles
-* lifecycle documenté
+- props typées
+- `CustomEvent`
+- méthodes publiques éventuelles
+- lifecycle documenté
 
 ---
 
@@ -1134,22 +1134,22 @@ Chaque composant doit exposer :
 
 ### 21.1 Outils minimum
 
-* FPS
-* temps frame
-* draw calls
-* nombre d’entités
-* nombre de rigid bodies
-* état input
-* état XR
-* état hand tracking
+- FPS
+- temps frame
+- draw calls
+- nombre d’entités
+- nombre de rigid bodies
+- état input
+- état XR
+- état hand tracking
 
 ### 21.2 Inspecteurs
 
-* inspector scène
-* inspector physique
-* inspector input
-* inspector XR
-* inspector hands
+- inspector scène
+- inspector physique
+- inspector input
+- inspector XR
+- inspector hands
 
 ### 21.3 Objectif
 
@@ -1163,32 +1163,32 @@ Permettre le debug rapide d’un moteur complexe multi-devices.
 
 Le package `testing` doit centraliser :
 
-* mocks
-* fixtures
-* harness
-* helpers d’assertion runtime
+- mocks
+- fixtures
+- harness
+- helpers d’assertion runtime
 
 ### 22.2 Mocks nécessaires
 
-* `requestAnimationFrame`
-* canvas
-* `XRSession`
-* `XRFrame`
-* `XRInputSource`
-* `XRHand`
-* `XRJointSpace`
-* `Gamepad`
+- `requestAnimationFrame`
+- canvas
+- `XRSession`
+- `XRFrame`
+- `XRInputSource`
+- `XRHand`
+- `XRJointSpace`
+- `Gamepad`
 
 ### 22.3 Scénarios de test
 
-* input desktop
-* input gamepad
-* input XR controllers
-* input XR hands
-* fallback capability
-* UI interaction
-* physics integration
-* engine lifecycle
+- input desktop
+- input gamepad
+- input XR controllers
+- input XR hands
+- fallback capability
+- UI interaction
+- physics integration
+- engine lifecycle
 
 ---
 
@@ -1200,18 +1200,18 @@ Le package `wasm` doit encapsuler les briques natives/compilées.
 
 ### 23.2 Responsabilités
 
-* chargement module wasm
-* initialisation backend
-* allocation/libération
-* pont TS ↔ WASM
-* handles opaques
-* sécurité mémoire côté interface
+- chargement module wasm
+- initialisation backend
+- allocation/libération
+- pont TS ↔ WASM
+- handles opaques
+- sécurité mémoire côté interface
 
 ### 23.3 Cas d’usage prioritaires
 
-* backend physique
-* collision queries
-* calculs intensifs plus tard
+- backend physique
+- collision queries
+- calculs intensifs plus tard
 
 ---
 
@@ -1223,24 +1223,24 @@ Les exemples sont une partie produit, pas un bonus.
 
 ### 24.2 Exemples minimaux
 
-* cube tournant
-* collisions simples
-* character controller desktop
-* gamepad movement
-* session XR controllers
-* hand tracking debug
-* pinch interaction
-* poke interaction
-* grab object
-* UI interaction
-* fallback automatique
+- cube tournant
+- collisions simples
+- character controller desktop
+- gamepad movement
+- session XR controllers
+- hand tracking debug
+- pinch interaction
+- poke interaction
+- grab object
+- UI interaction
+- fallback automatique
 
 ### 24.3 Objectif
 
-* démontrer les APIs
-* valider les features
-* servir de tests vivants
-* documenter l’usage réel
+- démontrer les APIs
+- valider les features
+- servir de tests vivants
+- documenter l’usage réel
 
 ---
 
@@ -1248,102 +1248,102 @@ Les exemples sont une partie produit, pas un bonus.
 
 ### Milestone 0 — Vision & architecture
 
-* vision produit
-* architecture globale
-* contrat d’API
-* règles de dépendances
-* stratégie capability/fallback
+- vision produit
+- architecture globale
+- contrat d’API
+- règles de dépendances
+- stratégie capability/fallback
 
 ### Milestone 1 — Foundation
 
-* monorepo
-* TypeScript
-* Vite
-* Vitest
-* CI
-* `core`
-* `math`
+- monorepo
+- TypeScript
+- Vite
+- Vitest
+- CI
+- `core`
+- `math`
 
 ### Milestone 2 — First runtime
 
-* boucle moteur
-* scène
-* renderer minimal
-* premier exemple desktop
+- boucle moteur
+- scène
+- renderer minimal
+- premier exemple desktop
 
 ### Milestone 3 — Physics
 
-* abstraction physique
-* backend WASM
-* rigid bodies
-* colliders
-* raycasts
+- abstraction physique
+- backend WASM
+- rigid bodies
+- colliders
+- raycasts
 
 ### Milestone 4 — Unified input
 
-* keyboard/mouse
-* gamepad
-* profils
-* actions
-* rebinding
+- keyboard/mouse
+- gamepad
+- profils
+- actions
+- rebinding
 
 ### Milestone 5 — XR controllers
 
-* session XR
-* tracking tête
-* contrôleurs
-* ray interaction
-* locomotion basique
+- session XR
+- tracking tête
+- contrôleurs
+- ray interaction
+- locomotion basique
 
 ### Milestone 6 — Hand tracking
 
-* états mains
-* joints
-* pinch/poke
-* near interaction
-* fallback
+- états mains
+- joints
+- pinch/poke
+- near interaction
+- fallback
 
 ### Milestone 7 — Audio + assets
 
-* audio sources
-* asset manager
-* premiers loaders
-* intégration dans exemples
+- audio sources
+- asset manager
+- premiers loaders
+- intégration dans exemples
 
 ### Milestone 8 — Gameplay + interaction unifiée
 
-* gameplay APIs
-* interactables
-* grab/use/select
-* indépendance vis-à-vis du device
+- gameplay APIs
+- interactables
+- grab/use/select
+- indépendance vis-à-vis du device
 
 ### Milestone 9 — UI layers
 
-* `ui-core`
-* `ui-webcomponents`
-* host component
-* debug components
+- `ui-core`
+- `ui-webcomponents`
+- host component
+- debug components
 
 ### Milestone 10 — Devtools + testing
 
-* inspecteurs runtime
-* mocks avancés
-* harness XR/hands
-* stabilisation tests
+- inspecteurs runtime
+- mocks avancés
+- harness XR/hands
+- stabilisation tests
 
 ### Milestone 11 — Examples + docs
 
-* exemples complets
-* docs d’API
-* guides d’intégration
-* guides de capabilities/fallback
+- exemples complets
+- docs d’API
+- guides d’intégration
+- guides de capabilities/fallback
 
 ### Milestone 12 — Hardening
 
-* optimisation
-* profiling
-* compatibilité multi-devices
-* stabilisation API
+- optimisation
+- profiling
+- compatibilité multi-devices
+- stabilisation API
 
 ---
 
@@ -1440,92 +1440,92 @@ Sans eux, un moteur multi-device devient très difficile à stabiliser.
 
 ### Epic 1 — Foundation
 
-* monorepo
-* configs
-* scripts
-* CI
+- monorepo
+- configs
+- scripts
+- CI
 
 ### Epic 2 — Math
 
-* types math
-* intersections
-* helpers XR/hands
+- types math
+- intersections
+- helpers XR/hands
 
 ### Epic 3 — Core
 
-* engine
-* lifecycle
-* scheduler
-* event system
+- engine
+- lifecycle
+- scheduler
+- event system
 
 ### Epic 4 — Scene + Renderer
 
-* entités
-* transforms
-* caméra
-* mesh render
+- entités
+- transforms
+- caméra
+- mesh render
 
 ### Epic 5 — WASM + Physics
 
-* loader wasm
-* backend bridge
-* world physique
-* rigid bodies/colliders
+- loader wasm
+- backend bridge
+- world physique
+- rigid bodies/colliders
 
 ### Epic 6 — Input
 
-* keyboard
-* mouse
-* gamepad
-* profiles
-* actions
+- keyboard
+- mouse
+- gamepad
+- profiles
+- actions
 
 ### Epic 7 — XR
 
-* session management
-* controllers
-* hands
-* capabilities
+- session management
+- controllers
+- hands
+- capabilities
 
 ### Epic 8 — Interaction
 
-* ray
-* near
-* pinch
-* poke
-* grab
+- ray
+- near
+- pinch
+- poke
+- grab
 
 ### Epic 9 — Audio + Assets
 
-* sources audio
-* asset manager
-* premiers loaders
+- sources audio
+- asset manager
+- premiers loaders
 
 ### Epic 10 — Gameplay
 
-* game state
-* spawn services
-* behaviours
-* interaction rules
+- game state
+- spawn services
+- behaviours
+- interaction rules
 
 ### Epic 11 — UI
 
-* ui-core
-* webcomponents Vue
-* debug panels
+- ui-core
+- webcomponents Vue
+- debug panels
 
 ### Epic 12 — Devtools + Testing
 
-* inspectors
-* mocks
-* fixtures
-* harness
+- inspectors
+- mocks
+- fixtures
+- harness
 
 ### Epic 13 — Examples
 
-* scènes de démonstration
-* intégration Web Components
-* modes desktop/XR/hands
+- scènes de démonstration
+- intégration Web Components
+- modes desktop/XR/hands
 
 ---
 
@@ -1533,17 +1533,17 @@ Sans eux, un moteur multi-device devient très difficile à stabiliser.
 
 Tu dois documenter en permanence :
 
-* vision produit
-* architecture
-* conventions de packages
-* APIs publiques
-* stratégie de tests
-* modèle d’input
-* capacités XR/hands
-* fallback matrix
-* intégration Web Components
-* ajout d’un backend WASM
-* ajout d’un nouvel exemple
+- vision produit
+- architecture
+- conventions de packages
+- APIs publiques
+- stratégie de tests
+- modèle d’input
+- capacités XR/hands
+- fallback matrix
+- intégration Web Components
+- ajout d’un backend WASM
+- ajout d’un nouvel exemple
 
 ---
 
@@ -1568,9 +1568,9 @@ La ligne directrice finale est :
 
 Je peux maintenant te faire la **version suivante encore plus opérationnelle**, avec :
 
-* l’**arborescence détaillée fichier par fichier**
-* les **packages exacts à créer**
-* l’**ordre réel d’implémentation**
-* et le **contenu initial de chaque package**.
+- l’**arborescence détaillée fichier par fichier**
+- les **packages exacts à créer**
+- l’**ordre réel d’implémentation**
+- et le **contenu initial de chaque package**.
 
 [Continuer avec ChatGPT](https://chatgpt.com/c/69e77438-1674-8396-82d9-8927e6fcb755)

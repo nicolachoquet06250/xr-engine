@@ -64,15 +64,12 @@ function createVirtualAppHtmlPlugin(entry: string, title: string): Plugin {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.end(html);
       });
-    }
+    },
   };
 }
 
 function getPackageDeps(pkg: WorkspacePackageJson | null): string[] {
-  return [
-    ...Object.keys(pkg?.dependencies ?? {}),
-    ...Object.keys(pkg?.peerDependencies ?? {})
-  ];
+  return [...Object.keys(pkg?.dependencies ?? {}), ...Object.keys(pkg?.peerDependencies ?? {})];
 }
 
 function getWorkspaceMeta(metaUrl: string) {
@@ -85,9 +82,9 @@ function getWorkspaceMeta(metaUrl: string) {
   const name = packageJson?.name ?? basename(workspaceDir);
   const hasVue = Boolean(
     packageJson?.dependencies?.vue ||
-      packageJson?.devDependencies?.vue ||
-      packageJson?.peerDependencies?.vue ||
-      packageJson?.devDependencies?.['@vitejs/plugin-vue']
+    packageJson?.devDependencies?.vue ||
+    packageJson?.peerDependencies?.vue ||
+    packageJson?.devDependencies?.['@vitejs/plugin-vue']
   );
 
   return {
@@ -98,7 +95,7 @@ function getWorkspaceMeta(metaUrl: string) {
     isPackage,
     isApp,
     name,
-    hasVue
+    hasVue,
   };
 }
 
@@ -107,8 +104,11 @@ export function createWorkspaceViteConfig(metaUrl: string) {
   const cacheKey = meta.relativeDir.replace(/[\/]/g, '_') || 'root';
   const plugins: Plugin[] = [
     tsconfigPaths({
-      projects: [resolve(meta.repoRoot, 'tsconfig.json'), resolve(meta.workspaceDir, 'tsconfig.json')]
-    })
+      projects: [
+        resolve(meta.repoRoot, 'tsconfig.json'),
+        resolve(meta.workspaceDir, 'tsconfig.json'),
+      ],
+    }),
   ];
 
   if (meta.hasVue) {
@@ -119,19 +119,19 @@ export function createWorkspaceViteConfig(metaUrl: string) {
     cacheDir: resolve(meta.repoRoot, 'node_modules/.vite', cacheKey),
     plugins,
     resolve: {
-      dedupe: meta.hasVue ? ['vue'] : []
+      dedupe: meta.hasVue ? ['vue'] : [],
     },
     server: {
       host: true,
-      open: false
+      open: false,
     },
     preview: {
       host: true,
-      open: false
+      open: false,
     },
     define: {
-      __DEV__: 'process.env.NODE_ENV !== "production"'
-    }
+      __DEV__: 'process.env.NODE_ENV !== "production"',
+    },
   };
 
   if (meta.isPackage) {
@@ -139,7 +139,7 @@ export function createWorkspaceViteConfig(metaUrl: string) {
     const externalPackages = new Set([
       ...builtinModules,
       ...builtinModules.map((moduleName) => `node:${moduleName}`),
-      ...getPackageDeps(meta.packageJson)
+      ...getPackageDeps(meta.packageJson),
     ]);
 
     return defineConfig({
@@ -154,7 +154,7 @@ export function createWorkspaceViteConfig(metaUrl: string) {
           entry,
           name: pascalCase(meta.name),
           formats: ['es'],
-          fileName: () => 'index.js'
+          fileName: () => 'index.js',
         },
         rollupOptions: {
           external: (id) => {
@@ -163,9 +163,9 @@ export function createWorkspaceViteConfig(metaUrl: string) {
             }
 
             return [...externalPackages].some((pkg) => id === pkg || id.startsWith(`${pkg}/`));
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -188,10 +188,10 @@ export function createWorkspaceViteConfig(metaUrl: string) {
           output: {
             entryFileNames: 'assets/[name].js',
             chunkFileNames: 'assets/[name]-[hash].js',
-            assetFileNames: 'assets/[name]-[hash][extname]'
-          }
-        }
-      }
+            assetFileNames: 'assets/[name]-[hash][extname]',
+          },
+        },
+      },
     });
   }
 

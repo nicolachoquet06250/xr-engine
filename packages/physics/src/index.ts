@@ -8,11 +8,20 @@
 // interface is available as `IPhysicsWorld` and an alias
 // `PhysicsWorldType`.
 export type {
-  CharacterController, RaycastHit,
-  Collider, RigidBody, RigidBodyType,
-  BoxCollider, CapsuleCollider, MeshCollider,
-  CollisionEvent, PhysicsMaterial, PhysicsWorld,
-  PhysicsWorldConfig, SphereCollider, TriggerEvent
+  CharacterController,
+  RaycastHit,
+  Collider,
+  RigidBody,
+  RigidBodyType,
+  BoxCollider,
+  CapsuleCollider,
+  MeshCollider,
+  CollisionEvent,
+  PhysicsMaterial,
+  PhysicsWorld,
+  PhysicsWorldConfig,
+  SphereCollider,
+  TriggerEvent,
 } from './physics';
 
 export const placeholder = 'physics package initialized';
