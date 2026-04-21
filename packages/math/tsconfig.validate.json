@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/index.ts", "src/math-runtime.ts"],
+  "exclude": ["src/__tests__/**"]
+}

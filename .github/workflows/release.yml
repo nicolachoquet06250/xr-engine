@@ -1,0 +1,57 @@
+name: Release artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify repository
+        run: npm run ci:verify
+
+      - name: Collect artifacts
+        run: npm run artifacts:collect
+
+      - name: Archive artifacts
+        run: |
+          cd .artifacts
+          zip -r ../xr-engine-artifacts-${{ github.ref_name }}.zip .
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: xr-engine-artifacts-${{ github.ref_name }}.zip
+          generate_release_notes: true
+
+      - name: Upload manual-run artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: xr-engine-artifacts-${{ github.run_number }}
+          path: xr-engine-artifacts-${{ github.ref_name || github.run_number }}.zip
+          if-no-files-found: ignore

@@ -1,0 +1,17 @@
+{
+  "name": "@xr-engine/physics",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "test": "vitest"
+  }
+  ,
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.13.1"
+  }
+}

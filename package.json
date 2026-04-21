@@ -1,0 +1,24 @@
+{
+  "name": "xr-engine",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "echo 'Run dev scripts at package level'",
+    "build": "echo 'Run build scripts at package level'",
+    "test": "echo 'Run tests at package level'"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^28.0.1",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "jsdom": "^27.0.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.0",
+    "vite-tsconfig-paths": "^6.0.0",
+    "vitest": "^4.1.0",
+    "vue": "^3.5.32"
+  }
+}

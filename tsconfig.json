@@ -1,0 +1,75 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "packages/**/src/**/*.ts",
+    "packages/**/src/**/*.d.ts",
+    "apps/**/src/**/*.ts",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ],
+  "references": [
+    {
+      "path": "apps/docs"
+    },
+    {
+      "path": "apps/playground"
+    },
+    {
+      "path": "apps/sandbox"
+    },
+    {
+      "path": "packages/assets"
+    },
+    {
+      "path": "packages/audio"
+    },
+    {
+      "path": "packages/core"
+    },
+    {
+      "path": "packages/devtools"
+    },
+    {
+      "path": "packages/examples"
+    },
+    {
+      "path": "packages/gameplay"
+    },
+    {
+      "path": "packages/input"
+    },
+    {
+      "path": "packages/interaction"
+    },
+    {
+      "path": "packages/math"
+    },
+    {
+      "path": "packages/physics"
+    },
+    {
+      "path": "packages/renderer"
+    },
+    {
+      "path": "packages/scene"
+    },
+    {
+      "path": "packages/testing"
+    },
+    {
+      "path": "packages/ui-core"
+    },
+    {
+      "path": "packages/ui-webcomponents"
+    },
+    {
+      "path": "packages/wasm"
+    },
+    {
+      "path": "packages/xr"
+    }
+  ]
+}
