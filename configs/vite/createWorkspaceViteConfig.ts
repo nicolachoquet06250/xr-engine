@@ -156,7 +156,7 @@ export function createWorkspaceViteConfig(metaUrl: string) {
           formats: ['es'],
           fileName: () => 'index.js',
         },
-        rollupOptions: {
+        rolldownOptions: {
           external: (id) => {
             if (id.startsWith('.') || id.startsWith('/') || id.startsWith('\0')) {
               return false;

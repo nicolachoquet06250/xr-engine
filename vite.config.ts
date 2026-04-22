@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   build: {
     lib: {
       entry: '',
       name: 'XREngine',
       formats: ['es'],
     },
+  },
+  resolve: {
+    tsconfigPaths: true,
   },
 });
