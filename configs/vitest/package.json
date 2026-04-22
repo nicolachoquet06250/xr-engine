@@ -1,0 +1,11 @@
+{
+  "name": "@xr-engine/config-vitest",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "vue": "^3.5.32"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.6"
+  }
+}

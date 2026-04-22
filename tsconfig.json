@@ -12,6 +12,12 @@
   ],
   "references": [
     {
+      "path": "configs/vite"
+    },
+    {
+      "path": "configs/vitest"
+    },
+    {
       "path": "apps/docs"
     },
     {

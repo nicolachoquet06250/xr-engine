@@ -4,6 +4,11 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "../math/src/index.d.ts"
+  ],
   "references": []
 }

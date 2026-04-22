@@ -32,7 +32,8 @@
      * `packages/renderer/src`.
      */
     "paths": {
-      "@xr-engine/*": ["packages/*/src"]
+      "@xr-engine/*": ["packages/*/src"],
+      "@xr-engine/config-*": ["config/*"]
     }
   },
   "exclude": ["node_modules", "dist"]
