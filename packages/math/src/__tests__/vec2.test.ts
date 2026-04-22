@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addVec2, dotVec2, lengthVec2, normalizeVec2, scaleVec2, subVec2, vec2 } from '../index';
+import { addVec2, dotVec2, lengthVec2, normalizeVec2, scaleVec2, subVec2, vec2 } from '../math-runtime';
 import { expectVec2Close } from './helpers';
 
 describe('Vec2 operations', () => {

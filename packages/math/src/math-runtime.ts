@@ -270,12 +270,12 @@ export function quatFromEuler(euler: EulerAngles): Quat {
 
 export function quatToEuler(q: Quat): EulerAngles {
   const nq = normalizeQuat(q);
-  const sinrCosp = 2 * (nq.w * nq.x + nq.y * nq.z);
+  const sinrCosp = 2 * (nq.w * nq.x - nq.y * nq.z);
   const cosrCosp = 1 - 2 * (nq.x * nq.x + nq.y * nq.y);
   const x = Math.atan2(sinrCosp, cosrCosp);
-  const sinp = 2 * (nq.w * nq.y - nq.z * nq.x);
+  const sinp = 2 * (nq.w * nq.y + nq.x * nq.z);
   const y = Math.abs(sinp) >= 1 ? Math.sign(sinp) * Math.PI * 0.5 : Math.asin(sinp);
-  const sinyCosp = 2 * (nq.w * nq.z + nq.x * nq.y);
+  const sinyCosp = 2 * (nq.w * nq.z - nq.x * nq.y);
   const cosyCosp = 1 - 2 * (nq.y * nq.y + nq.z * nq.z);
   const z = Math.atan2(sinyCosp, cosyCosp);
   return Object.freeze({ x, y, z, order: 'XYZ' as const });

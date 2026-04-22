@@ -7,7 +7,7 @@ import {
   computePoseDelta,
   quat,
   vec3,
-} from '../index';
+} from '../math-runtime';
 import { expectClose, expectQuatClose, expectVec3Close } from './helpers';
 
 describe('Hand tracking helpers', () => {

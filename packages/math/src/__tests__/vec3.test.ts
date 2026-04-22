@@ -10,7 +10,7 @@ import {
   scaleVec3,
   subVec3,
   vec3,
-} from '../index';
+} from '../math-runtime';
 import { expectVec3Close } from './helpers';
 
 describe('Vec3 operations', () => {

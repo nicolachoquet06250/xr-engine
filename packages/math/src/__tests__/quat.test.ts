@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { multiplyQuat, normalizeQuat, quat, quatFromEuler, quatToEuler } from '../index';
+import { multiplyQuat, normalizeQuat, quat, quatFromEuler, quatToEuler } from '../math-runtime';
 import { expectClose, expectQuatClose } from './helpers';
 
 describe('Quaternion operations', () => {

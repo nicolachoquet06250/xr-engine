@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mat3, mat4, quat, vec2, vec3, vec4 } from '../index';
+import { mat3, mat4, quat, vec2, vec3, vec4 } from '../math-runtime';
 
 describe('math constructors', () => {
   it('creates zero vectors by default', () => {

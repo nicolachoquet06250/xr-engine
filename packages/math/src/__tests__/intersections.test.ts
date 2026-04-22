@@ -5,7 +5,7 @@ import {
   intersectRayPlane,
   intersectRaySphere,
   vec3,
-} from '../index';
+} from '../math-runtime';
 import { expectClose } from './helpers';
 
 describe('Intersection helpers', () => {

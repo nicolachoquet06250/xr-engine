@@ -42,10 +42,8 @@ import {
   vec2,
   vec3,
   vec4,
-  type Frustum,
-  type HandJointPose,
-  type Plane,
-} from '../index';
+} from '../math-runtime';
+import type { Frustum, HandJointPose, Plane } from '../math';
 
 const EPS = 1e-5;
 

@@ -5,12 +5,13 @@ import {
   invertMat4,
   mat4,
   multiplyMat4,
+  normalizeVec3,
   quatFromEuler,
   transformDirection,
   transformPoint,
   transposeMat4,
   vec3,
-} from '../index';
+} from '../math-runtime';
 import { expectClose, expectMat4Close, expectQuatClose, expectVec3Close } from './helpers';
 
 describe('Mat4 operations', () => {
@@ -40,7 +41,7 @@ describe('Mat4 operations', () => {
     });
 
     expectVec3Close(transformPoint(matrix, vec3(1, 2, 3)), vec3(6, 8, 10));
-    expectVec3Close(transformDirection(matrix, vec3(1, 2, 3)), vec3(1, 2, 3));
+    expectVec3Close(transformDirection(matrix, vec3(1, 2, 3)), normalizeVec3(vec3(1, 2, 3)));
   });
 
   it('inverts a composed matrix', () => {
