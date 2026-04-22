@@ -813,9 +813,9 @@ Utiliser un hybride :
 
 ---
 
-## 11. Implémenter le renderer → On en est là
+## 11. Implémenter le renderer ✅
 
-### 11.1 Milestone 1
+### 11.1 Milestone 1 ✅
 
 - canvas
 - clear color
@@ -823,7 +823,7 @@ Utiliser un hybride :
 - cube
 - caméra perspective
 
-### 11.2 Milestone 2
+### 11.2 Milestone 2 ✅
 
 - meshes
 - materials
@@ -831,13 +831,13 @@ Utiliser un hybride :
 - depth test
 - resize
 
-### 11.3 Milestone 3
+### 11.3 Milestone 3 ✅
 
 - lumière de base
 - culling
 - instancing
 
-### 11.4 Support XR
+### 11.4 Support XR ✅
 
 - vues stéréoscopiques
 - caméras XR
@@ -845,7 +845,7 @@ Utiliser un hybride :
 
 ---
 
-## 12. Intégrer la physique
+## 12. Intégrer la physique → On en est là
 
 ### 12.1 Stratégie
 
