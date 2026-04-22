@@ -4,11 +4,11 @@
 
 ---
 
-## 1. Définir le périmètre exact du moteur
+## 1. Définir le périmètre exact du moteur ✅
 
 Avant toute implémentation, il faut verrouiller le périmètre produit.
 
-### 1.1 Objectif du projet
+### 1.1 Objectif du projet ✅
 
 Le projet doit être défini comme :
 
@@ -27,7 +27,7 @@ Le moteur doit couvrir :
 - pipeline de tests
 - intégration WebAssembly pour les zones critiques
 
-### 1.2 Modes d’interaction à supporter
+### 1.2 Modes d’interaction à supporter ✅
 
 Le moteur doit fonctionner dans les modes suivants :
 
@@ -54,7 +54,7 @@ Le moteur doit fonctionner dans les modes suivants :
 - near interaction
 - fallback si certaines capacités manquent
 
-### 1.3 Principe d’abstraction fondamental
+### 1.3 Principe d’abstraction fondamental ✅
 
 Le gameplay ne doit jamais dépendre directement :
 
@@ -80,9 +80,9 @@ Le gameplay doit dépendre d’**intentions** :
 
 ---
 
-## 2. Fixer les contraintes non négociables
+## 2. Fixer les contraintes non négociables ✅
 
-### 2.1 Stack technique imposée
+### 2.1 Stack technique imposée ✅
 
 Tout le projet doit utiliser :
 
@@ -93,7 +93,7 @@ Tout le projet doit utiliser :
 - **Web Components**
 - **WebAssembly** pour les parties critiques
 
-### 2.2 Contraintes d’architecture
+### 2.2 Contraintes d’architecture ✅
 
 Tu dois imposer les règles suivantes :
 
@@ -104,7 +104,7 @@ Tu dois imposer les règles suivantes :
 - WebAssembly est encapsulé derrière des APIs TypeScript
 - toute fonctionnalité importante doit être testée
 
-### 2.3 Exigences de qualité
+### 2.3 Exigences de qualité ✅
 
 Le moteur doit être :
 
@@ -118,11 +118,11 @@ Le moteur doit être :
 
 ---
 
-## 3. Concevoir l’architecture générale
+## 3. Concevoir l’architecture générale ✅
 
 L’architecture doit être organisée en couches fonctionnelles.
 
-### 3.1 Couche Core Runtime
+### 3.1 Couche Core Runtime ✅
 
 Responsabilités :
 
@@ -134,7 +134,7 @@ Responsabilités :
 - événements globaux
 - état global du runtime
 
-### 3.2 Couche Math
+### 3.2 Couche Math ✅
 
 Responsabilités :
 
@@ -146,7 +146,7 @@ Responsabilités :
 - volumes
 - helpers pour physique, rendu, XR et hand tracking
 
-### 3.3 Couche Scene
+### 3.3 Couche Scene ✅
 
 Responsabilités :
 
@@ -158,7 +158,7 @@ Responsabilités :
 - layers
 - activation/destruction
 
-### 3.4 Couche Renderer
+### 3.4 Couche Renderer ✅
 
 Responsabilités :
 
@@ -170,7 +170,7 @@ Responsabilités :
 - passes de rendu
 - pipeline XR
 
-### 3.5 Couche Physics
+### 3.5 Couche Physics ✅
 
 Responsabilités :
 
@@ -182,7 +182,7 @@ Responsabilités :
 - world stepping
 - synchronisation scène ↔ physique
 
-### 3.6 Couche Input
+### 3.6 Couche Input ✅
 
 Responsabilités :
 
@@ -193,7 +193,7 @@ Responsabilités :
 - normalisation des signaux
 - mapping vers actions
 
-### 3.7 Couche XR
+### 3.7 Couche XR ✅
 
 Responsabilités :
 
@@ -204,7 +204,7 @@ Responsabilités :
 - mode controllers / hands
 - fallback XR
 
-### 3.8 Couche Interaction
+### 3.8 Couche Interaction ✅
 
 Responsabilités :
 
@@ -216,7 +216,7 @@ Responsabilités :
 - interaction UI
 - teleportation
 
-### 3.9 Couche Audio
+### 3.9 Couche Audio ✅
 
 Responsabilités :
 
@@ -226,7 +226,7 @@ Responsabilités :
 - lecture/arrêt/boucle
 - feedback sonore interaction
 
-### 3.10 Couche Assets
+### 3.10 Couche Assets ✅
 
 Responsabilités :
 
@@ -239,7 +239,7 @@ Responsabilités :
 - scènes
 - manifests
 
-### 3.11 Couche UI Core
+### 3.11 Couche UI Core ✅
 
 Responsabilités :
 
@@ -249,7 +249,7 @@ Responsabilités :
 - routing UI interne si nécessaire
 - bridge entre runtime et composants d’affichage
 
-### 3.12 Couche UI WebComponents
+### 3.12 Couche UI WebComponents ✅
 
 Responsabilités :
 
@@ -259,7 +259,7 @@ Responsabilités :
 - HUD
 - outils d’inspection exposés au DOM
 
-### 3.13 Couche Gameplay
+### 3.13 Couche Gameplay ✅
 
 Responsabilités :
 
@@ -270,7 +270,7 @@ Responsabilités :
 - helpers de spawning
 - patterns de gameplay réutilisables
 
-### 3.14 Couche Devtools
+### 3.14 Couche Devtools ✅
 
 Responsabilités :
 
@@ -281,7 +281,7 @@ Responsabilités :
 - arbre de scène
 - debug physique
 
-### 3.15 Couche Testing
+### 3.15 Couche Testing ✅
 
 Responsabilités :
 
@@ -291,7 +291,7 @@ Responsabilités :
 - test harness runtime
 - simulation d’inputs et d’états XR
 
-### 3.16 Couche WASM
+### 3.16 Couche WASM ✅
 
 Responsabilités :
 
@@ -302,7 +302,7 @@ Responsabilités :
 - potentiellement pathfinding plus tard
 - contrats mémoire / handles
 
-### 3.17 Couche Examples
+### 3.17 Couche Examples ✅
 
 Responsabilités :
 
@@ -314,9 +314,9 @@ Responsabilités :
 
 ---
 
-## 4. Définir la structure du monorepo
+## 4. Définir la structure du monorepo ✅
 
-### 4.1 Structure recommandée
+### 4.1 Structure recommandée ✅
 
 ```text id="repo-structure"
 packages/
@@ -350,7 +350,7 @@ configs/
   eslint/
 ```
 
-### 4.2 Packages minimaux à démarrer
+### 4.2 Packages minimaux à démarrer ✅
 
 Les packages MVP doivent être :
 
@@ -372,7 +372,7 @@ Les packages MVP doivent être :
 - `@engine/wasm`
 - `@engine/examples`
 
-### 4.3 Règles de dépendances
+### 4.3 Règles de dépendances ✅
 
 Tu dois fixer une direction stricte :
 
@@ -396,11 +396,11 @@ Tu dois fixer une direction stricte :
 
 ---
 
-## 5. Définir les APIs publiques de chaque domaine
+## 5. Définir les APIs publiques de chaque domaine ✅
 
 Avant de développer, il faut écrire les interfaces publiques.
 
-### 5.1 API `core`
+### 5.1 API `core` ✅
 
 Responsabilités publiques :
 
@@ -414,7 +414,7 @@ Responsabilités publiques :
 - `Engine.resume()`
 - `Engine.mount()`
 
-### 5.2 API `math`
+### 5.2 API `math` ✅
 
 Responsabilités publiques :
 
@@ -432,7 +432,7 @@ Responsabilités publiques :
 - helpers d’intersections
 - helpers de calcul hand tracking
 
-### 5.3 API `scene`
+### 5.3 API `scene` ✅
 
 Responsabilités publiques :
 
@@ -445,7 +445,7 @@ Responsabilités publiques :
 - `SceneNode`
 - `SceneGraph`
 
-### 5.4 API `renderer`
+### 5.4 API `renderer` ✅
 
 Responsabilités publiques :
 
@@ -457,7 +457,7 @@ Responsabilités publiques :
 - `ShaderProgram`
 - `RenderPass`
 
-### 5.5 API `physics`
+### 5.5 API `physics` ✅
 
 Responsabilités publiques :
 
@@ -469,7 +469,7 @@ Responsabilités publiques :
 - `CollisionEvent`
 - `TriggerEvent`
 
-### 5.6 API `input`
+### 5.6 API `input` ✅
 
 Responsabilités publiques :
 
@@ -480,7 +480,7 @@ Responsabilités publiques :
 - `InputContext`
 - `InputDeviceAdapter`
 
-### 5.7 API `xr`
+### 5.7 API `xr` ✅
 
 Responsabilités publiques :
 
@@ -491,7 +491,7 @@ Responsabilités publiques :
 - `XRTrackingCapabilities`
 - `XRReferenceSpaceState`
 
-### 5.8 API `interaction`
+### 5.8 API `interaction` ✅
 
 Responsabilités publiques :
 
@@ -504,7 +504,7 @@ Responsabilités publiques :
 - `UIInteractor`
 - `Interactable`
 
-### 5.9 API `audio`
+### 5.9 API `audio` ✅
 
 Responsabilités publiques :
 
@@ -516,7 +516,7 @@ Responsabilités publiques :
 - `AudioBus`
 - `AudioPlaybackHandle`
 
-### 5.10 API `assets`
+### 5.10 API `assets` ✅
 
 Responsabilités publiques :
 
@@ -530,7 +530,7 @@ Responsabilités publiques :
 - `AudioAsset`
 - `SceneAsset`
 
-### 5.11 API `gameplay`
+### 5.11 API `gameplay` ✅
 
 Responsabilités publiques :
 
@@ -542,7 +542,7 @@ Responsabilités publiques :
 - `ScriptBehaviour`
 - helpers de logique réutilisable
 
-### 5.12 API `ui-core`
+### 5.12 API `ui-core` ✅
 
 Responsabilités publiques :
 
@@ -553,7 +553,7 @@ Responsabilités publiques :
 - `UINodeModel`
 - `UIPanelState`
 
-### 5.13 API `ui-webcomponents`
+### 5.13 API `ui-webcomponents` ✅
 
 Responsabilités publiques :
 
@@ -566,7 +566,7 @@ Responsabilités publiques :
 - `<xr-hand-debug>`
 - `<xr-input-profile-viewer>`
 
-### 5.14 API `devtools`
+### 5.14 API `devtools` ✅
 
 Responsabilités publiques :
 
@@ -578,7 +578,7 @@ Responsabilités publiques :
 - `HandTrackingInspector`
 - `PerformancePanel`
 
-### 5.15 API `testing`
+### 5.15 API `testing` ✅
 
 Responsabilités publiques :
 
@@ -591,7 +591,7 @@ Responsabilités publiques :
 - `renderFrame()`
 - fixtures de scène et d’input
 
-### 5.16 API `wasm`
+### 5.16 API `wasm` ✅
 
 Responsabilités publiques :
 
@@ -602,7 +602,7 @@ Responsabilités publiques :
 - contrats d’allocation/libération
 - adaptateurs TS ↔ WASM
 
-### 5.17 API `examples`
+### 5.17 API `examples` ✅
 
 Responsabilités publiques :
 
@@ -615,11 +615,11 @@ Responsabilités publiques :
 
 ---
 
-## 6. Concevoir le modèle de capacités et de fallback
+## 6. Concevoir le modèle de capacités et de fallback ✅
 
 Le moteur doit être capability-driven.
 
-### 6.1 Capacités à exposer
+### 6.1 Capacités à exposer ✅
 
 Le runtime doit savoir exposer :
 
@@ -633,7 +633,7 @@ Le runtime doit savoir exposer :
 - support ray interaction
 - support near interaction
 
-### 6.2 Fallbacks
+### 6.2 Fallbacks ✅
 
 Tu dois prévoir les transitions suivantes :
 
@@ -642,15 +642,15 @@ Tu dois prévoir les transitions suivantes :
 - tracking perdu → mode safe/fallback
 - interaction lointaine indisponible → UI de proximité ou alternative
 
-### 6.3 Règle de conception
+### 6.3 Règle de conception ✅
 
 Aucune mécanique principale ne doit dépendre exclusivement d’un seul device.
 
 ---
 
-## 7. Mettre en place le repository et l’outillage
+## 7. Mettre en place le repository et l’outillage ✅
 
-### 7.1 Bootstrap
+### 7.1 Bootstrap ✅
 
 Initialise :
 
@@ -663,7 +663,7 @@ Initialise :
 - CI
 - scripts workspace
 
-### 7.2 Configuration TypeScript
+### 7.2 Configuration TypeScript ✅
 
 Prévoir :
 
@@ -673,7 +673,7 @@ Prévoir :
 - builds incrémentaux
 - séparation nette `src` / `tests`
 
-### 7.3 Configuration Vite
+### 7.3 Configuration Vite ✅
 
 Prévoir :
 
@@ -683,7 +683,7 @@ Prévoir :
 - build examples
 - build custom elements
 
-### 7.4 Configuration Vitest
+### 7.4 Configuration Vitest ✅
 
 Prévoir :
 
@@ -694,7 +694,7 @@ Prévoir :
 - setup files
 - mocks XR/canvas/gamepad
 
-### 7.5 CI/CD
+### 7.5 CI/CD ✅
 
 Pipeline minimal :
 
@@ -707,9 +707,9 @@ Pipeline minimal :
 
 ---
 
-## 8. Construire le socle mathématique
+## 8. Construire le socle mathématique ✅
 
-### 8.1 Types
+### 8.1 Types ✅
 
 Implémenter :
 
@@ -725,7 +725,7 @@ Implémenter :
 - `AABB`
 - `Frustum`
 
-### 8.2 Fonctions
+### 8.2 Fonctions ✅
 
 - transformations
 - projections
@@ -734,15 +734,15 @@ Implémenter :
 - calculs spatiaux XR
 - utilitaires pour joints de mains
 
-### 8.3 Tests
+### 8.3 Tests ✅
 
 Ce package doit être fortement couvert.
 
 ---
 
-## 9. Construire le runtime cœur
+## 9. Construire le runtime cœur ✅
 
-### 9.1 Boucle moteur -> On en est là
+### 9.1 Boucle moteur ✅
 
 Le runtime doit séparer :
 
@@ -752,7 +752,7 @@ Le runtime doit séparer :
 - step physique
 - rendu
 
-### 9.2 Temps
+### 9.2 Temps ✅
 
 - delta time
 - fixed time step
@@ -760,7 +760,7 @@ Le runtime doit séparer :
 - pause/resume
 - time scaling
 
-### 9.3 Système d’événements
+### 9.3 Système d’événements ✅
 
 Catégories :
 
@@ -771,7 +771,7 @@ Catégories :
 - interaction
 - UI
 
-### 9.4 Gestion des ressources runtime
+### 9.4 Gestion des ressources runtime ✅
 
 - enregistrement des systèmes
 - accès services
@@ -779,7 +779,7 @@ Catégories :
 
 ---
 
-## 10. Construire la scène et les composants
+## 10. Construire la scène et les composants → On en est là
 
 ### 10.1 Modèle
 

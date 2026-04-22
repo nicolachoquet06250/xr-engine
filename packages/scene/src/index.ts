@@ -1,26 +1,50 @@
-// Re-export type declarations from the declaration file.  The
-// `export type` syntax ensures no runtime code is emitted for these
-// exports.  Consumers can import these types via
-// `@xr-engine/scene`.
 export type {
-  Component,
-  Entity,
-  Scene,
-  Transform,
+  AudioSourceComponent,
   Camera,
-  Light,
+  CameraComponent,
+  ColliderComponent,
+  Component,
   ComponentType,
+  Entity,
   EntityId,
+  HandInteractableComponent,
+  InteractableComponent,
   LayerMask,
-  TagSet,
+  Light,
+  LightComponent,
+  MeshComponent,
+  RigidBodyComponent,
+  Scene,
   SceneGraph,
   SceneNode,
-} from './scene.d.ts';
+  SceneSystemId,
+  TagSet,
+  Transform,
+  TransformComponent,
+} from './scene.d';
 
-// Scene package public API.  Only type exports are provided here
-// to avoid coupling consumers to the concrete implementation.  If
-// runtime values are needed (e.g. a default scene factory) they
-// should be defined in a separate implementation file.  The
-// placeholder constant remains for backwards compatibility but
-// consumers should not rely on it.
+export {
+  addAudioSourceComponent,
+  addCameraComponent,
+  addColliderComponent,
+  addHandInteractableComponent,
+  addInteractableComponent,
+  addLightComponent,
+  addMeshComponent,
+  addRigidBodyComponent,
+  addTransformComponent,
+  AUDIO_SOURCE_COMPONENT,
+  CAMERA_COMPONENT,
+  COLLIDER_COMPONENT,
+  createComponentType,
+  createScene,
+  HAND_INTERACTABLE_COMPONENT,
+  INTERACTABLE_COMPONENT,
+  LIGHT_COMPONENT,
+  MESH_COMPONENT,
+  RIGID_BODY_COMPONENT,
+  SCENE_SYSTEM_IDS,
+  TRANSFORM_COMPONENT,
+} from './scene-runtime';
+
 export const placeholder = 'scene package initialized';
