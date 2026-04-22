@@ -12,15 +12,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "types": [],
-
-    /**
-     * Base directory relative to which TypeScript will resolve non‑relative module imports.
-     * Setting this enables the use of path mapping below.  Without a `baseUrl`,
-     * the `paths` entries would be ignored.  We choose the repository root so
-     * that imports like `@xr-engine/renderer` can be mapped to their
-     * corresponding package sources.
-     */
-    "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
 
     /**
      * Path mappings for package aliases.  These entries allow TypeScript (and
