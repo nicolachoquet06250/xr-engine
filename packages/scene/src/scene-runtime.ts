@@ -3,11 +3,8 @@ import {
   mat4,
   multiplyMat4,
   quat,
-  vec3,
-  type Mat4,
-  type Quat,
-  type Vec3,
-} from '@xr-engine/math';
+  vec3
+} from '../../math/src';
 
 import type {
   AudioSourceComponent,
@@ -28,6 +25,8 @@ import type {
   Transform,
   TransformComponent,
 } from './scene.d';
+
+import type { Mat4, Quat, Vec3 } from '../../math/src/index.d';
 
 let sceneSequence = 0;
 let entitySequence = 0;
