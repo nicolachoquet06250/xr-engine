@@ -14,6 +14,7 @@
     "types": [],
     "ignoreDeprecations": "6.0",
 
+    "baseUrl": "./",
     /**
      * Path mappings for package aliases.  These entries allow TypeScript (and
      * tools like Vite via the `vite-tsconfig-paths` plugin) to resolve
