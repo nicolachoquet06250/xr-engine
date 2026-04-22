@@ -344,7 +344,7 @@ class EngineImpl implements Engine {
 
   private cancelScheduledFrame(): void {
     if (this.animationHandle == null) return;
-    if (typeof cancelAnimationFrame === 'function' && (typeof this.animationHandle) === 'number') {
+    if (typeof cancelAnimationFrame === 'function' && typeof this.animationHandle === 'number') {
       cancelAnimationFrame(this.animationHandle);
     } else {
       clearTimeout(this.animationHandle as ReturnType<typeof setTimeout>);
