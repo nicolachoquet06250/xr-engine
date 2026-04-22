@@ -1,4 +1,4 @@
-import type { Quat, Vec2, Vec3 } from '../../math/src/math';
+import type { Quat, Vec2, Vec3 } from '@xr-engine/math';
 
 export type InputDeviceType =
   | 'keyboard'
