@@ -1,4 +1,4 @@
-import { transformPoint, vec3 } from '@xr-engine/math';
+import { transformPoint, vec3 } from '../../../math/src/math-runtime';
 import { describe, expect, it } from 'vitest';
 
 import {
