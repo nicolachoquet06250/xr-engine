@@ -1,10 +1,4 @@
-import {
-  composeTRS,
-  mat4,
-  multiplyMat4,
-  quat,
-  vec3
-} from '../../math/src';
+import { composeTRS, mat4, multiplyMat4, quat, vec3 } from '../../math/src';
 
 import type {
   AudioSourceComponent,
