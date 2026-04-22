@@ -779,16 +779,16 @@ Catégories :
 
 ---
 
-## 10. Construire la scène et les composants → On en est là
+## 10. Construire la scène et les composants ✅
 
-### 10.1 Modèle
+### 10.1 Modèle ✅
 
 Utiliser un hybride :
 
 - scene graph pour hiérarchie/transforms
 - composants/systèmes pour logique
 
-### 10.2 Composants MVP
+### 10.2 Composants MVP ✅
 
 - `TransformComponent`
 - `CameraComponent`
@@ -800,7 +800,7 @@ Utiliser un hybride :
 - `InteractableComponent`
 - `HandInteractableComponent`
 
-### 10.3 Systèmes MVP
+### 10.3 Systèmes MVP ✅
 
 - `TransformSystem`
 - `RenderSystem`
@@ -813,7 +813,7 @@ Utiliser un hybride :
 
 ---
 
-## 11. Implémenter le renderer
+## 11. Implémenter le renderer → On en est là
 
 ### 11.1 Milestone 1
 
