@@ -18,6 +18,7 @@ export default tseslint.config(...tseslint.configs.recommended, {
     '@typescript-eslint/no-unused-vars': 'off', //['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/no-empty-object-type': 'off',
+    '@typescript-eslint/no-this-alias': 'off',
   },
   ignores: ['**/dist/**', '**/coverage/**', '**/node_modules/**'],
 });

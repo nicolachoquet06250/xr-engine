@@ -13,12 +13,12 @@ export interface FrameInfo {
 }
 
 export interface Time {
-  readonly elapsedTime: number;
-  readonly deltaTime: number;
-  readonly fixedDeltaTime: number;
-  readonly frame: number;
-  readonly timeScale: number;
-  readonly paused: boolean;
+  elapsedTime: number;
+  deltaTime: number;
+  fixedDeltaTime: number;
+  frame: number;
+  timeScale: number;
+  paused: boolean;
 }
 
 export type LifecycleState =
@@ -33,6 +33,7 @@ export type LifecycleState =
 export interface RuntimeContext {
   readonly time: Time;
   readonly state: LifecycleState;
+  readonly eventBus: RuntimeEventBus;
   getService<T>(token: ServiceToken<T>): T;
   hasService(token: ServiceToken<unknown>): boolean;
 }
@@ -64,6 +65,63 @@ export interface EngineMountTarget {
   readonly canvas?: HTMLCanvasElement;
 }
 
+export type SystemPhase = 'input' | 'xr' | 'update' | 'fixedUpdate' | 'lateUpdate' | 'render';
+
+export type RuntimeEventCategory =
+  | 'runtime'
+  | 'lifecycle'
+  | 'input'
+  | 'xr'
+  | 'collision'
+  | 'interaction'
+  | 'ui';
+
+export interface RuntimeEventBase<TType extends string = string, TPayload = unknown> {
+  readonly category: RuntimeEventCategory;
+  readonly type: TType;
+  readonly timestamp: number;
+  readonly frame: number;
+  readonly payload: TPayload;
+}
+
+export interface RuntimeEventMap {
+  runtime: RuntimeEventBase<string, unknown>;
+  lifecycle: RuntimeEventBase<string, unknown>;
+  input: RuntimeEventBase<string, unknown>;
+  xr: RuntimeEventBase<string, unknown>;
+  collision: RuntimeEventBase<string, unknown>;
+  interaction: RuntimeEventBase<string, unknown>;
+  ui: RuntimeEventBase<string, unknown>;
+}
+
+export interface RuntimeEventBus {
+  emit<K extends keyof RuntimeEventMap>(event: RuntimeEventMap[K]): void;
+  on<K extends keyof RuntimeEventMap>(
+    category: K,
+    listener: (event: RuntimeEventMap[K]) => void
+  ): Disposable;
+  once<K extends keyof RuntimeEventMap>(
+    category: K,
+    listener: (event: RuntimeEventMap[K]) => void
+  ): Disposable;
+  off<K extends keyof RuntimeEventMap>(
+    category: K,
+    listener: (event: RuntimeEventMap[K]) => void
+  ): void;
+  clear(category?: keyof RuntimeEventMap): void;
+}
+
+export interface SystemRegistration {
+  readonly system: EngineSystem;
+  readonly priority: number;
+  readonly phases: readonly SystemPhase[];
+}
+
+export interface ServiceRegistration<T = unknown> {
+  readonly token: ServiceToken<T>;
+  readonly value: T;
+}
+
 export interface Engine {
   readonly state: LifecycleState;
   readonly context: RuntimeContext;
@@ -78,8 +136,75 @@ export interface Engine {
   unregisterSystem(systemId: string): void;
   registerService<T>(token: ServiceToken<T>, service: T): void;
   getService<T>(token: ServiceToken<T>): T;
+  hasService(token: ServiceToken<unknown>): boolean;
+  step(timestamp?: number): FrameInfo;
   use(plugin: EnginePlugin): void;
 }
 
+export interface RuntimeContextInternal extends RuntimeContext {
+  readonly eventBus: RuntimeEventBus;
+}
+
 export declare function createEngine(config?: EngineConfig): Engine;
+export declare function createRuntimeEventBus(): RuntimeEventBus;
 export declare function createServiceToken<T>(description: string): ServiceToken<T>;
+
+export type SystemPhase = 'input' | 'xr' | 'update' | 'fixedUpdate' | 'lateUpdate' | 'render';
+export type RuntimeEventCategory =
+  | 'runtime'
+  | 'lifecycle'
+  | 'input'
+  | 'xr'
+  | 'collision'
+  | 'interaction'
+  | 'ui';
+
+export interface RuntimeEventBase<TType extends string = string, TPayload = unknown> {
+  readonly category: RuntimeEventCategory;
+  readonly type: TType;
+  readonly timestamp: number;
+  readonly frame: number;
+  readonly payload: TPayload;
+}
+
+export interface RuntimeEventMap {
+  runtime: RuntimeEventBase<string, unknown>;
+  lifecycle: RuntimeEventBase<string, unknown>;
+  input: RuntimeEventBase<string, unknown>;
+  xr: RuntimeEventBase<string, unknown>;
+  collision: RuntimeEventBase<string, unknown>;
+  interaction: RuntimeEventBase<string, unknown>;
+  ui: RuntimeEventBase<string, unknown>;
+}
+
+export interface RuntimeEventBus {
+  emit<K extends keyof RuntimeEventMap>(event: RuntimeEventMap[K]): void;
+  on<K extends keyof RuntimeEventMap>(
+    category: K,
+    listener: (event: RuntimeEventMap[K]) => void
+  ): Disposable;
+  once<K extends keyof RuntimeEventMap>(
+    category: K,
+    listener: (event: RuntimeEventMap[K]) => void
+  ): Disposable;
+  off<K extends keyof RuntimeEventMap>(
+    category: K,
+    listener: (event: RuntimeEventMap[K]) => void
+  ): void;
+  clear(category?: keyof RuntimeEventMap): void;
+}
+
+export interface SystemRegistration {
+  readonly system: EngineSystem;
+  readonly priority: number;
+  readonly phases: readonly SystemPhase[];
+}
+
+export interface ServiceRegistration<T = unknown> {
+  readonly token: ServiceToken<T>;
+  readonly value: T;
+}
+
+export interface RuntimeContextInternal extends RuntimeContext {
+  readonly eventBus: RuntimeEventBus;
+}

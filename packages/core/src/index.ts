@@ -1,16 +1,25 @@
 export type {
-  Engine,
-  EngineConfig,
-  Disposable,
+  RuntimeContextInternal,
+  RuntimeEventBase,
+  RuntimeEventBus,
+  RuntimeEventCategory,
+  RuntimeEventMap,
+  ServiceRegistration,
+  SystemPhase,
+  SystemRegistration,
   Time,
   EngineMountTarget,
   EnginePlugin,
-  FrameInfo,
   EngineSystem,
-  ServiceToken,
+  FrameInfo,
   LifecycleState,
   RuntimeContext,
-} from './engine';
+  Engine,
+  Disposable,
+  EngineConfig,
+  ServiceToken,
+} from './engine.d';
 
-// Placeholder for core package
+export { createEngine, createRuntimeEventBus, createServiceToken } from './engine';
+
 export const placeholder = 'core package initialized';
