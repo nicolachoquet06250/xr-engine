@@ -15,4 +15,6 @@ export type {
   UniformBuffer,
 } from './render';
 
+export { createRenderer } from './render-runtime';
+
 export const placeholder = 'renderer package initialized';
