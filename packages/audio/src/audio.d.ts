@@ -1,4 +1,4 @@
-import type { Vec3 } from '../../math/src/math';
+import type { Vec3 } from '@xr-engine/math';
 
 export interface AudioClip {
   readonly id: string;

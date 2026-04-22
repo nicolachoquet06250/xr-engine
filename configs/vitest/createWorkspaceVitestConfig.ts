@@ -1,7 +1,8 @@
 import { resolve } from 'node:path';
 import vue from '@vitejs/plugin-vue';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import { defineConfig, type UserConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
+import type { UserConfig } from 'vite';
 
 export interface WorkspaceVitestOptions {
   workspaceDir: string;
