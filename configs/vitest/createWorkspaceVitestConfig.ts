@@ -49,8 +49,8 @@ export function createWorkspaceVitestConfig(options: WorkspaceVitestOptions): Us
     cacheDir: resolve(repoRoot, 'node_modules', '.vitest', workspaceName),
     resolve: {
       alias: {
-        ['@xr-engine/' + options.workspaceDir]: repoRoot + "/src"
-      }
-    }
+        ['@xr-engine/' + options.workspaceDir]: repoRoot + '/src',
+      },
+    },
   });
 }
