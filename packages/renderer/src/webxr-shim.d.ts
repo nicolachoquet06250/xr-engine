@@ -51,15 +51,15 @@ interface XRSession extends EventTarget {
   end(): Promise<void>;
 }
 
-declare var XRSession: {
+declare const XRSession: {
   prototype: XRSession;
 };
 
-declare var XRFrame: {
+declare const XRFrame: {
   prototype: XRFrame;
 };
 
-declare var XRReferenceSpace: {
+declare const XRReferenceSpace: {
   prototype: XRReferenceSpace;
 };
 
