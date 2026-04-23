@@ -543,7 +543,12 @@ class RendererImpl implements Renderer {
       this.gl.clear(colorMask | depthMask);
     }
 
-    const { commands, culledEntityCount } = buildRenderCommands(scene, camera, this._context, this.meshes);
+    const { commands, culledEntityCount } = buildRenderCommands(
+      scene,
+      camera,
+      this._context,
+      this.meshes
+    );
 
     if (this.gl && this.builtinPipeline) {
       this.gl.useProgram?.(this.builtinPipeline.program);
