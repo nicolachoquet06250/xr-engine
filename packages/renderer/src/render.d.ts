@@ -1,3 +1,4 @@
+import type { Mat4 } from '@xr-engine/math';
 import type { Scene, Camera } from '@xr-engine/scene';
 
 export interface RendererConfig {
@@ -57,10 +58,31 @@ export interface GeometryBuffer {
 
 export interface CameraRenderData {
   readonly camera: Camera;
+  readonly viewMatrix: Mat4;
+  readonly projectionMatrix: Mat4;
 }
 
 export interface LightRenderData {
   readonly lightId: string;
+}
+
+export interface RenderCommand {
+  readonly entityId: string;
+  readonly meshId: string;
+  readonly materialId: string;
+  readonly modelMatrix: Mat4;
+  readonly viewMatrix: Mat4;
+  readonly projectionMatrix: Mat4;
+  readonly mvpMatrix: Mat4;
+  readonly vertexCount: number;
+  readonly indexCount: number;
+}
+
+export interface RenderFrameSnapshot {
+  readonly commandCount: number;
+  readonly viewportWidth: number;
+  readonly viewportHeight: number;
+  readonly commands: readonly RenderCommand[];
 }
 
 export interface RenderPass {
@@ -70,6 +92,7 @@ export interface RenderPass {
 
 export interface Renderer {
   readonly context: RenderContext;
+  readonly lastFrame: RenderFrameSnapshot | null;
   initialize(config?: RendererConfig): Promise<void>;
   resize(width: number, height: number, pixelRatio?: number): void;
   render(scene: Scene, camera: Camera): void;
@@ -90,3 +113,4 @@ export interface Renderer {
 }
 
 export declare function createRenderer(config?: RendererConfig): Renderer;
+export declare function createRenderTarget(width: number, height: number): RenderTarget;
