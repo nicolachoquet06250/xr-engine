@@ -259,10 +259,22 @@ function createPerspectiveProjection(camera: Camera, context: RenderContext): Ma
     const left = -right;
 
     return mat4([
-      2 / (right - left), 0, 0, 0,
-      0, 2 / (top - bottom), 0, 0,
-      0, 0, -2 / (far - near), 0,
-      -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1,
+      2 / (right - left),
+      0,
+      0,
+      0,
+      0,
+      2 / (top - bottom),
+      0,
+      0,
+      0,
+      0,
+      -2 / (far - near),
+      0,
+      -(right + left) / (right - left),
+      -(top + bottom) / (top - bottom),
+      -(far + near) / (far - near),
+      1,
     ]);
   }
 
@@ -270,10 +282,22 @@ function createPerspectiveProjection(camera: Camera, context: RenderContext): Ma
   const f = 1 / Math.tan(fovRadians / 2);
 
   return mat4([
-    f / aspect, 0, 0, 0,
-    0, f, 0, 0,
-    0, 0, (far + near) / (near - far), -1,
-    0, 0, (2 * far * near) / (near - far), 0,
+    f / aspect,
+    0,
+    0,
+    0,
+    0,
+    f,
+    0,
+    0,
+    0,
+    0,
+    (far + near) / (near - far),
+    -1,
+    0,
+    0,
+    (2 * far * near) / (near - far),
+    0,
   ]);
 }
 
@@ -467,10 +491,7 @@ class RendererImpl implements Renderer {
     }
 
     if (this.gl?.bindFramebuffer && this.gl.FRAMEBUFFER !== undefined) {
-      this.gl.bindFramebuffer(
-        this.gl.FRAMEBUFFER,
-        this.state.currentTarget?.framebuffer ?? null
-      );
+      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.state.currentTarget?.framebuffer ?? null);
     }
 
     if (this.gl?.clearColor) {
@@ -526,12 +547,7 @@ class RendererImpl implements Renderer {
           this.gl.TRIANGLES !== undefined
         ) {
           this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
-          this.gl.drawElements?.(
-            this.gl.TRIANGLES,
-            command.indexCount,
-            this.gl.UNSIGNED_SHORT,
-            0
-          );
+          this.gl.drawElements?.(this.gl.TRIANGLES, command.indexCount, this.gl.UNSIGNED_SHORT, 0);
         } else if (this.gl.TRIANGLES !== undefined) {
           this.gl.drawArrays?.(this.gl.TRIANGLES, 0, command.vertexCount);
         }
