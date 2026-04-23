@@ -82,6 +82,11 @@ export interface RenderFrameSnapshot {
   readonly commandCount: number;
   readonly viewportWidth: number;
   readonly viewportHeight: number;
+  readonly drawCallCount: number;
+  readonly visibleEntityCount: number;
+  readonly culledEntityCount: number;
+  readonly materialSwitchCount: number;
+  readonly meshSwitchCount: number;
   readonly commands: readonly RenderCommand[];
 }
 
