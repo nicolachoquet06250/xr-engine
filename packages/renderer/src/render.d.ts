@@ -95,6 +95,14 @@ export interface RenderCommand {
   readonly indexCount: number;
 }
 
+export interface RenderInstanceBatch {
+  readonly shaderId: string;
+  readonly materialId: string;
+  readonly meshId: string;
+  readonly instanceCount: number;
+  readonly commandIndices: readonly number[];
+}
+
 export interface RenderFrameSnapshot {
   readonly commandCount: number;
   readonly viewportWidth: number;
@@ -106,7 +114,11 @@ export interface RenderFrameSnapshot {
   readonly meshSwitchCount: number;
   readonly shaderSwitchCount: number;
   readonly lightCount: number;
+  readonly instanceBatchCount: number;
+  readonly instancedDrawCallCount: number;
+  readonly totalInstanceCount: number;
   readonly commands: readonly RenderCommand[];
+  readonly instanceBatches: readonly RenderInstanceBatch[];
 }
 
 export interface RenderPass {
