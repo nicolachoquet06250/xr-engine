@@ -26,26 +26,6 @@ import type {
   Texture,
 } from './render';
 
-type InstancingExtension = {
-  drawArraysInstancedANGLE(mode: number, first: number, count: number, primcount: number): void;
-  drawElementsInstancedANGLE(
-    mode: number,
-    count: number,
-    type: number,
-    offset: number,
-    primcount: number
-  ): void;
-  vertexAttribDivisorANGLE(index: number, divisor: number): void;
-};
-
-type InstanceBatch = {
-  shaderId: string;
-  materialId: string;
-  meshId: string;
-  instanceCount: number;
-  commandIndices: readonly number[];
-};
-
 type GL = WebGLRenderingContext | WebGL2RenderingContext;
 
 type InternalMesh = Mesh & {
@@ -75,6 +55,26 @@ type BuildRenderCommandsResult = {
   culledEntityCount: number;
 };
 
+type InstancingExtension = {
+  drawArraysInstancedANGLE(mode: number, first: number, count: number, primcount: number): void;
+  drawElementsInstancedANGLE(
+    mode: number,
+    count: number,
+    type: number,
+    offset: number,
+    primcount: number
+  ): void;
+  vertexAttribDivisorANGLE(index: number, divisor: number): void;
+};
+
+type InstanceBatch = {
+  shaderId: string;
+  materialId: string;
+  meshId: string;
+  instanceCount: number;
+  commandIndices: readonly number[];
+};
+
 const BUILTIN_SHADER_ID = '__builtin__/unlit';
 const BUILTIN_VERTEX_SOURCE = `
 attribute vec3 a_position;
@@ -98,37 +98,6 @@ let textureSequence = 0;
 let materialSequence = 0;
 let shaderSequence = 0;
 let targetSequence = 0;
-
-function buildInstanceBatches(commands: readonly RenderCommand[]): readonly InstanceBatch[] {
-  const groups = new Map<string, number[]>();
-
-  commands.forEach((command, index) => {
-    const key = `${command.shaderId}|${command.materialId}|${command.meshId}`;
-    const current = groups.get(key);
-    if (current) {
-      current.push(index);
-    } else {
-      groups.set(key, [index]);
-    }
-  });
-
-  return Object.freeze(
-    Array.from(groups.entries()).map(([key, indices]) => {
-      const [shaderId, materialId, meshId] = key.split('|');
-      return Object.freeze({
-        shaderId,
-        materialId,
-        meshId,
-        instanceCount: indices.length,
-        commandIndices: Object.freeze(indices.slice()),
-      });
-    })
-  );
-}
-
-function isWebGL2(gl: GL): gl is WebGL2RenderingContext {
-  return typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
-}
 
 function createMeshId(): string {
   meshSequence += 1;
@@ -165,6 +134,10 @@ function makeShaderProgram(config: {
     vertexSource: config.vertexSource,
     fragmentSource: config.fragmentSource,
   });
+}
+
+function isWebGL2(gl: GL): gl is WebGL2RenderingContext {
+  return typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
 }
 
 function isMat4Value(value: unknown): value is Mat4 {
@@ -274,6 +247,33 @@ function countSwitches<T>(items: readonly T[], selector: (item: T) => string): n
   }
 
   return count;
+}
+
+function buildInstanceBatches(commands: readonly RenderCommand[]): readonly InstanceBatch[] {
+  const groups = new Map<string, number[]>();
+
+  commands.forEach((command, index) => {
+    const key = `${command.shaderId}|${command.materialId}|${command.meshId}`;
+    const current = groups.get(key);
+    if (current) {
+      current.push(index);
+    } else {
+      groups.set(key, [index]);
+    }
+  });
+
+  return Object.freeze(
+    Array.from(groups.entries()).map(([key, indices]) => {
+      const [shaderId, materialId, meshId] = key.split('|');
+      return Object.freeze({
+        shaderId,
+        materialId,
+        meshId,
+        instanceCount: indices.length,
+        commandIndices: Object.freeze(indices.slice()),
+      });
+    })
+  );
 }
 
 function uploadMaterialUniform(
@@ -422,9 +422,6 @@ class RendererImpl implements Renderer {
   private gl: GL | null = null;
   private canvas: HTMLCanvasElement | null = null;
 
-  private instanceBuffer: WebGLBuffer | null = null;
-  private instancingExt: InstancingExtension | null = null;
-
   private readonly meshes = new Map<string, InternalMesh>();
   private readonly materials = new Map<string, InternalMaterial>();
   private readonly textures = new Map<string, InternalTexture>();
@@ -434,6 +431,9 @@ class RendererImpl implements Renderer {
 
   private currentRenderTarget: InternalRenderTarget | null = null;
   private _context: RenderContext = { width: 0, height: 0, pixelRatio: 1 };
+
+  private instanceBuffer: WebGLBuffer | null = null;
+  private instancingExt: InstancingExtension | null = null;
 
   public lastFrame: RenderFrameSnapshot | null = null;
 
@@ -465,7 +465,6 @@ class RendererImpl implements Renderer {
     if (!this.gl) return;
 
     this.gl.enable(this.gl.DEPTH_TEST);
-
     this.instanceBuffer = this.gl.createBuffer();
 
     if (!isWebGL2(this.gl)) {
@@ -581,11 +580,11 @@ class RendererImpl implements Renderer {
         (isWebGL2(gl) || this.instancingExt !== null);
 
       if (supportsInstancing) {
-        const modelData = new Float32Array(batch.instanceCount * 16);
+        const instanceData = new Float32Array(batch.instanceCount * 16);
 
         batch.commandIndices.forEach((commandIndex, instanceIndex) => {
           const command = commands[commandIndex];
-          modelData.set(command.mvpMatrix.elements, instanceIndex * 16);
+          instanceData.set(command.mvpMatrix.elements, instanceIndex * 16);
         });
 
         gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
@@ -593,7 +592,7 @@ class RendererImpl implements Renderer {
         gl.vertexAttribPointer(program.attribPosition, 3, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, modelData, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, instanceData, gl.DYNAMIC_DRAW);
 
         for (let i = 0; i < 4; i += 1) {
           const attrib = program.attribInstanceModel[i];
