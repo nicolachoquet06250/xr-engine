@@ -26,6 +26,26 @@ import type {
   Texture,
 } from './render';
 
+type InstancingExtension = {
+  drawArraysInstancedANGLE(mode: number, first: number, count: number, primcount: number): void;
+  drawElementsInstancedANGLE(
+    mode: number,
+    count: number,
+    type: number,
+    offset: number,
+    primcount: number
+  ): void;
+  vertexAttribDivisorANGLE(index: number, divisor: number): void;
+};
+
+type InstanceBatch = {
+  shaderId: string;
+  materialId: string;
+  meshId: string;
+  instanceCount: number;
+  commandIndices: readonly number[];
+};
+
 type GL = WebGLRenderingContext | WebGL2RenderingContext;
 
 type InternalMesh = Mesh & {
@@ -46,6 +66,7 @@ type InternalRenderTarget = RenderTarget & {
 type CompiledProgram = {
   program: WebGLProgram;
   attribPosition: number;
+  attribInstanceModel: readonly [number, number, number, number];
   uniforms: Map<string, WebGLUniformLocation | null>;
 };
 
@@ -77,6 +98,37 @@ let textureSequence = 0;
 let materialSequence = 0;
 let shaderSequence = 0;
 let targetSequence = 0;
+
+function buildInstanceBatches(commands: readonly RenderCommand[]): readonly InstanceBatch[] {
+  const groups = new Map<string, number[]>();
+
+  commands.forEach((command, index) => {
+    const key = `${command.shaderId}|${command.materialId}|${command.meshId}`;
+    const current = groups.get(key);
+    if (current) {
+      current.push(index);
+    } else {
+      groups.set(key, [index]);
+    }
+  });
+
+  return Object.freeze(
+    Array.from(groups.entries()).map(([key, indices]) => {
+      const [shaderId, materialId, meshId] = key.split('|');
+      return Object.freeze({
+        shaderId,
+        materialId,
+        meshId,
+        instanceCount: indices.length,
+        commandIndices: Object.freeze(indices.slice()),
+      });
+    })
+  );
+}
+
+function isWebGL2(gl: GL): gl is WebGL2RenderingContext {
+  return typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
+}
 
 function createMeshId(): string {
   meshSequence += 1;
@@ -370,6 +422,9 @@ class RendererImpl implements Renderer {
   private gl: GL | null = null;
   private canvas: HTMLCanvasElement | null = null;
 
+  private instanceBuffer: WebGLBuffer | null = null;
+  private instancingExt: InstancingExtension | null = null;
+
   private readonly meshes = new Map<string, InternalMesh>();
   private readonly materials = new Map<string, InternalMaterial>();
   private readonly textures = new Map<string, InternalTexture>();
@@ -411,6 +466,14 @@ class RendererImpl implements Renderer {
 
     this.gl.enable(this.gl.DEPTH_TEST);
 
+    this.instanceBuffer = this.gl.createBuffer();
+
+    if (!isWebGL2(this.gl)) {
+      this.instancingExt = this.gl.getExtension(
+        'ANGLE_instanced_arrays'
+      ) as InstancingExtension | null;
+    }
+
     for (const shader of this.shaders.values()) {
       this.compile(shader);
     }
@@ -446,13 +509,23 @@ class RendererImpl implements Renderer {
       this.materials
     );
 
-    let currentProgram: CompiledProgram | null = null;
+    const instanceBatches = buildInstanceBatches(commands);
 
-    for (const cmd of commands) {
-      const mesh = this.meshes.get(cmd.meshId);
+    let currentProgram: CompiledProgram | null = null;
+    let drawCallCount = 0;
+    let instancedDrawCallCount = 0;
+    let totalInstanceCount = 0;
+
+    for (const batch of instanceBatches) {
+      const firstCommand = commands[batch.commandIndices[0]];
+      if (!firstCommand) continue;
+
+      const mesh = this.meshes.get(batch.meshId);
       if (!mesh?.buffer) continue;
 
-      const material = this.materials.get(cmd.materialId);
+      const material =
+        batch.materialId !== '__default__' ? (this.materials.get(batch.materialId) ?? null) : null;
+
       const shaderId = material?.shader.id ?? BUILTIN_SHADER_ID;
 
       let program = this.programs.get(shaderId) ?? null;
@@ -467,19 +540,6 @@ class RendererImpl implements Renderer {
       if (currentProgram !== program) {
         gl.useProgram(program.program);
         currentProgram = program;
-      }
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
-      gl.enableVertexAttribArray(program.attribPosition);
-      gl.vertexAttribPointer(program.attribPosition, 3, gl.FLOAT, false, 0, 0);
-
-      let mvpLocation = program.uniforms.get('u_mvp');
-      if (mvpLocation === undefined) {
-        mvpLocation = gl.getUniformLocation(program.program, 'u_mvp');
-        program.uniforms.set('u_mvp', mvpLocation);
-      }
-      if (mvpLocation) {
-        gl.uniformMatrix4fv(mvpLocation, false, cmd.mvpMatrix.elements as Float32List);
       }
 
       const primaryLight = lights[0] ?? null;
@@ -513,22 +573,132 @@ class RendererImpl implements Renderer {
       }
 
       const parameters = material?.parameters ?? { u_color: [1, 1, 1, 1] as const };
-      const textureUnitRef = { current: 0 };
 
-      for (const [name, value] of Object.entries(parameters)) {
-        let location = program.uniforms.get(name);
-        if (location === undefined) {
-          location = gl.getUniformLocation(program.program, name);
-          program.uniforms.set(name, location);
+      const supportsInstancing =
+        batch.instanceCount > 1 &&
+        this.instanceBuffer !== null &&
+        program.attribInstanceModel.every((location) => location >= 0) &&
+        (isWebGL2(gl) || this.instancingExt !== null);
+
+      if (supportsInstancing) {
+        const modelData = new Float32Array(batch.instanceCount * 16);
+
+        batch.commandIndices.forEach((commandIndex, instanceIndex) => {
+          const command = commands[commandIndex];
+          modelData.set(command.mvpMatrix.elements, instanceIndex * 16);
+        });
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+        gl.enableVertexAttribArray(program.attribPosition);
+        gl.vertexAttribPointer(program.attribPosition, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, modelData, gl.DYNAMIC_DRAW);
+
+        for (let i = 0; i < 4; i += 1) {
+          const attrib = program.attribInstanceModel[i];
+          gl.enableVertexAttribArray(attrib);
+          gl.vertexAttribPointer(attrib, 4, gl.FLOAT, false, 64, i * 16);
+
+          if (isWebGL2(gl)) {
+            gl.vertexAttribDivisor(attrib, 1);
+          } else {
+            this.instancingExt!.vertexAttribDivisorANGLE(attrib, 1);
+          }
         }
-        uploadMaterialUniform(gl, location ?? null, value, this.textures, textureUnitRef);
+
+        const textureUnitRef = { current: 0 };
+        for (const [name, value] of Object.entries(parameters)) {
+          let location = program.uniforms.get(name);
+          if (location === undefined) {
+            location = gl.getUniformLocation(program.program, name);
+            program.uniforms.set(name, location);
+          }
+          uploadMaterialUniform(gl, location ?? null, value, this.textures, textureUnitRef);
+        }
+
+        if (mesh.indexBuffer && mesh.indexCount > 0) {
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+
+          if (isWebGL2(gl)) {
+            gl.drawElementsInstanced(
+              gl.TRIANGLES,
+              mesh.indexCount,
+              gl.UNSIGNED_SHORT,
+              0,
+              batch.instanceCount
+            );
+          } else {
+            this.instancingExt!.drawElementsInstancedANGLE(
+              gl.TRIANGLES,
+              mesh.indexCount,
+              gl.UNSIGNED_SHORT,
+              0,
+              batch.instanceCount
+            );
+          }
+        } else {
+          if (isWebGL2(gl)) {
+            gl.drawArraysInstanced(gl.TRIANGLES, 0, mesh.vertexCount, batch.instanceCount);
+          } else {
+            this.instancingExt!.drawArraysInstancedANGLE(
+              gl.TRIANGLES,
+              0,
+              mesh.vertexCount,
+              batch.instanceCount
+            );
+          }
+        }
+
+        for (let i = 0; i < 4; i += 1) {
+          const attrib = program.attribInstanceModel[i];
+          if (isWebGL2(gl)) {
+            gl.vertexAttribDivisor(attrib, 0);
+          } else {
+            this.instancingExt!.vertexAttribDivisorANGLE(attrib, 0);
+          }
+        }
+
+        drawCallCount += 1;
+        instancedDrawCallCount += 1;
+        totalInstanceCount += batch.instanceCount;
+        continue;
       }
 
-      if (mesh.indexBuffer && mesh.indexCount > 0) {
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
-        gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
-      } else {
-        gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount);
+      for (const commandIndex of batch.commandIndices) {
+        const cmd = commands[commandIndex];
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+        gl.enableVertexAttribArray(program.attribPosition);
+        gl.vertexAttribPointer(program.attribPosition, 3, gl.FLOAT, false, 0, 0);
+
+        let mvpLocation = program.uniforms.get('u_mvp');
+        if (mvpLocation === undefined) {
+          mvpLocation = gl.getUniformLocation(program.program, 'u_mvp');
+          program.uniforms.set('u_mvp', mvpLocation);
+        }
+        if (mvpLocation) {
+          gl.uniformMatrix4fv(mvpLocation, false, cmd.mvpMatrix.elements as Float32List);
+        }
+
+        const textureUnitRef = { current: 0 };
+        for (const [name, value] of Object.entries(parameters)) {
+          let location = program.uniforms.get(name);
+          if (location === undefined) {
+            location = gl.getUniformLocation(program.program, name);
+            program.uniforms.set(name, location);
+          }
+          uploadMaterialUniform(gl, location ?? null, value, this.textures, textureUnitRef);
+        }
+
+        if (mesh.indexBuffer && mesh.indexCount > 0) {
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+          gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
+        } else {
+          gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount);
+        }
+
+        drawCallCount += 1;
       }
     }
 
@@ -536,17 +706,17 @@ class RendererImpl implements Renderer {
       commandCount: commands.length,
       viewportWidth,
       viewportHeight,
-      drawCallCount: commands.length,
+      drawCallCount,
       visibleEntityCount: commands.length,
       culledEntityCount,
       materialSwitchCount: countSwitches(commands, (c) => c.materialId),
       meshSwitchCount: countSwitches(commands, (c) => c.meshId),
       shaderSwitchCount: countSwitches(commands, (c) => c.shaderId),
       lightCount: lights.length,
-      instanceBatchCount: 0,
-      instancedDrawCallCount: 0,
-      totalInstanceCount: 0,
-      instanceBatches: [],
+      instanceBatchCount: instanceBatches.length,
+      instancedDrawCallCount,
+      totalInstanceCount,
+      instanceBatches,
       commands,
     };
   }
@@ -746,6 +916,12 @@ class RendererImpl implements Renderer {
     const compiled: CompiledProgram = {
       program,
       attribPosition: gl.getAttribLocation(program, 'a_position'),
+      attribInstanceModel: [
+        gl.getAttribLocation(program, 'a_instanceModel0'),
+        gl.getAttribLocation(program, 'a_instanceModel1'),
+        gl.getAttribLocation(program, 'a_instanceModel2'),
+        gl.getAttribLocation(program, 'a_instanceModel3'),
+      ] as const,
       uniforms: new Map(),
     };
 
