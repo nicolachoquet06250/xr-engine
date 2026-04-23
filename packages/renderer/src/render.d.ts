@@ -119,8 +119,15 @@ export interface Renderer {
   setRenderTarget(target: RenderTarget | null): void;
   createMesh(data: unknown): Mesh;
   createTexture(source: TexImageSource | ImageBitmap | ImageData): Texture;
-  createShaderProgram(config: { id?: string; vertexSource: string; fragmentSource: string }): ShaderProgram;
-  createMaterial(config: { shader: ShaderProgram; parameters?: Record<string, ShaderUniformValue> }): Material;
+  createShaderProgram(config: {
+    id?: string;
+    vertexSource: string;
+    fragmentSource: string;
+  }): ShaderProgram;
+  createMaterial(config: {
+    shader: ShaderProgram;
+    parameters?: Record<string, ShaderUniformValue>;
+  }): Material;
   disposeResource(
     resource:
       | Mesh
