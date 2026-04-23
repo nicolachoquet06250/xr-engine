@@ -77,6 +77,9 @@ export interface CameraRenderData {
 
 export interface LightRenderData {
   readonly lightId: string;
+  readonly direction: readonly [number, number, number];
+  readonly color: readonly [number, number, number];
+  readonly intensity: number;
 }
 
 export interface RenderCommand {
@@ -102,6 +105,7 @@ export interface RenderFrameSnapshot {
   readonly materialSwitchCount: number;
   readonly meshSwitchCount: number;
   readonly shaderSwitchCount: number;
+  readonly lightCount: number;
   readonly commands: readonly RenderCommand[];
 }
 
