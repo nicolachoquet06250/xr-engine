@@ -1,5 +1,3 @@
-// 👉 (je garde ça lisible mais complet — aucune partie manquante)
-
 import type { Camera, MeshComponent, Scene } from '../../scene/src';
 import { MESH_COMPONENT } from '../../scene/src';
 
@@ -20,10 +18,6 @@ import type {
   Texture,
 } from './render';
 
-// =============================
-// Types internes
-// =============================
-
 type GL = WebGLRenderingContext | WebGL2RenderingContext;
 
 type InternalMesh = Mesh & {
@@ -42,10 +36,6 @@ type CompiledProgram = {
   attribPosition: number;
   uniforms: Map<string, WebGLUniformLocation | null>;
 };
-
-// =============================
-// Utils
-// =============================
 
 function isVisible(mvp: Mat4): boolean {
   const p = transformPoint(mvp, vec3(0, 0, 0));
@@ -79,9 +69,80 @@ function createPerspective(camera: Camera, ctx: RenderContext): Mat4 {
   ]);
 }
 
-// =============================
-// Renderer
-// =============================
+function isMat4Value(value: unknown): value is Mat4 {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'elements' in value &&
+    (Array.isArray((value as { elements: unknown }).elements) ||
+      ArrayBuffer.isView((value as { elements: unknown }).elements))
+  );
+}
+
+function isTextureValue(value: unknown): value is Texture {
+  return typeof value === 'object' && value !== null && 'id' in value && typeof (value as Texture).id === 'string';
+}
+
+function countSwitches<T>(items: readonly T[], selector: (item: T) => string): number {
+  let count = 0;
+  let previous: string | null = null;
+  for (const item of items) {
+    const current = selector(item);
+    if (previous !== current) {
+      previous = current;
+      count += 1;
+    }
+  }
+  return count;
+}
+
+function uploadMaterialUniform(
+  gl: GL,
+  location: WebGLUniformLocation | null,
+  value: ShaderUniformValue,
+  textures: Map<string, InternalTexture>,
+  textureUnitRef: { current: number }
+): void {
+  if (location === null) return;
+
+  if (typeof value === 'number') {
+    gl.uniform1f(location, value);
+    return;
+  }
+
+  if (typeof value === 'boolean') {
+    gl.uniform1i(location, value ? 1 : 0);
+    return;
+  }
+
+  if (isMat4Value(value)) {
+    gl.uniformMatrix4fv(location, false, value.elements as Float32List);
+    return;
+  }
+
+  if (isTextureValue(value)) {
+    const texture = textures.get(value.id);
+    if (texture?.handle) {
+      const unit = textureUnitRef.current;
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      gl.bindTexture(gl.TEXTURE_2D, texture.handle);
+      gl.uniform1i(location, unit);
+      textureUnitRef.current += 1;
+    }
+    return;
+  }
+
+  if (Array.isArray(value) || ArrayBuffer.isView(value)) {
+    const arrayValue = Array.from(value as ReadonlyArray<number>);
+    if (arrayValue.length === 2) {
+      gl.uniform2fv(location, arrayValue);
+    } else if (arrayValue.length === 3) {
+      gl.uniform3fv(location, arrayValue);
+    } else if (arrayValue.length === 4) {
+      gl.uniform4fv(location, arrayValue);
+    }
+  }
+}
 
 class RendererImpl implements Renderer {
   private gl: GL | null = null;
@@ -111,12 +172,10 @@ class RendererImpl implements Renderer {
     if (!this.canvas) return;
 
     this.gl = this.canvas.getContext('webgl2') || (this.canvas.getContext('webgl') as GL);
-
     if (!this.gl) return;
 
     this.gl.enable(this.gl.DEPTH_TEST);
 
-    // compile existing shaders
     for (const shader of this.shaders.values()) {
       this.compile(shader);
     }
@@ -151,9 +210,9 @@ class RendererImpl implements Renderer {
       if (!e.active) continue;
 
       const mc = e.getComponent<MeshComponent>(MESH_COMPONENT);
-      if (!mc?.enabled) continue;
+      if (!mc?.enabled || !mc.meshId) continue;
 
-      const mesh = this.meshes.get(mc.meshId!);
+      const mesh = this.meshes.get(mc.meshId);
       if (!mesh) continue;
 
       const mat = mc.materialId ? this.materials.get(mc.materialId) : null;
@@ -163,7 +222,7 @@ class RendererImpl implements Renderer {
       const mvp = multiplyMat4(vp, model);
 
       if (!isVisible(mvp)) {
-        culled++;
+        culled += 1;
         continue;
       }
 
@@ -181,9 +240,11 @@ class RendererImpl implements Renderer {
       });
     }
 
-    // sort
     commands.sort(
-      (a, b) => a.shaderId.localeCompare(b.shaderId) || a.materialId.localeCompare(b.materialId)
+      (a, b) =>
+        a.shaderId.localeCompare(b.shaderId) ||
+        a.materialId.localeCompare(b.materialId) ||
+        a.meshId.localeCompare(b.meshId)
     );
 
     let currentProgram: CompiledProgram | null = null;
@@ -194,11 +255,9 @@ class RendererImpl implements Renderer {
       const shader = mat?.shader;
 
       let program = shader ? this.programs.get(shader.id) : null;
-
       if (!program && shader) {
         program = this.compile(shader);
       }
-
       if (!program) continue;
 
       if (currentProgram !== program) {
@@ -206,33 +265,33 @@ class RendererImpl implements Renderer {
         currentProgram = program;
       }
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer!);
-
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer ?? null);
       gl.enableVertexAttribArray(program.attribPosition);
       gl.vertexAttribPointer(program.attribPosition, 3, gl.FLOAT, false, 0, 0);
 
-      gl.uniformMatrix4fv(
-        program.uniforms.get('u_mvp')!,
-        false,
-        cmd.mvpMatrix.elements as Float32Array
-      );
-
-      // uniforms material
-      if (mat) {
-        for (const [k, v] of Object.entries(mat.parameters)) {
-          const loc = program.uniforms.get(k);
-          if (!loc) continue;
-
-          if (typeof v === 'number') gl.uniform1f(loc, v);
-          else if (Array.isArray(v)) {
-            if (v.length === 2) gl.uniform2fv(loc, v);
-            if (v.length === 3) gl.uniform3fv(loc, v);
-            if (v.length === 4) gl.uniform4fv(loc, v);
-          }
-        }
+      const mvpLocation = program.uniforms.get('u_mvp') ?? null;
+      if (mvpLocation) {
+        gl.uniformMatrix4fv(mvpLocation, false, cmd.mvpMatrix.elements as Float32List);
       }
 
-      gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount);
+      const parameters = mat?.parameters ?? { u_color: [1, 1, 1, 1] as const };
+      const textureUnitRef = { current: 0 };
+
+      for (const [name, value] of Object.entries(parameters)) {
+        let loc = program.uniforms.get(name);
+        if (loc === undefined) {
+          loc = gl.getUniformLocation(program.program, name);
+          program.uniforms.set(name, loc);
+        }
+        uploadMaterialUniform(gl, loc ?? null, value, this.textures, textureUnitRef);
+      }
+
+      if (mesh.indexBuffer && mesh.indexCount > 0) {
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
+      } else {
+        gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount);
+      }
     }
 
     this.lastFrame = {
@@ -242,18 +301,14 @@ class RendererImpl implements Renderer {
       drawCallCount: commands.length,
       visibleEntityCount: commands.length,
       culledEntityCount: culled,
-      materialSwitchCount: 0,
-      meshSwitchCount: 0,
-      shaderSwitchCount: 0,
+      materialSwitchCount: countSwitches(commands, (c) => c.materialId),
+      meshSwitchCount: countSwitches(commands, (c) => c.meshId),
+      shaderSwitchCount: countSwitches(commands, (c) => c.shaderId),
       commands,
     };
   }
 
-  // =============================
-  // Resources
-  // =============================
-
-  createMesh(data: any): Mesh {
+  createMesh(data: number[]): Mesh {
     const id = crypto.randomUUID();
 
     const mesh: InternalMesh = {
@@ -279,6 +334,18 @@ class RendererImpl implements Renderer {
       width: (source as ImageBitmap | ImageData).width ?? 0,
       height: (source as ImageBitmap | ImageData).height ?? 0,
     };
+
+    if (this.gl) {
+      tex.handle = this.gl.createTexture()!;
+      this.gl.bindTexture(this.gl.TEXTURE_2D, tex.handle);
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, source);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+    }
+
     this.textures.set(id, tex);
     return tex;
   }
@@ -295,9 +362,7 @@ class RendererImpl implements Renderer {
     };
 
     this.shaders.set(shader.id, shader);
-
     if (this.gl) this.compile(shader);
-
     return shader;
   }
 
@@ -338,6 +403,9 @@ class RendererImpl implements Renderer {
       uniforms: new Map(),
     };
 
+    compiled.uniforms.set('u_mvp', gl.getUniformLocation(prog, 'u_mvp'));
+    compiled.uniforms.set('u_color', gl.getUniformLocation(prog, 'u_color'));
+
     this.programs.set(shader.id, compiled);
     return compiled;
   }
@@ -347,14 +415,22 @@ class RendererImpl implements Renderer {
   disposeResource(): void {}
 }
 
-// =============================
-// Exports
-// =============================
-
 export function createRenderer(config?: RendererConfig): Renderer {
   return new RendererImpl(config);
 }
 
 export function createRenderTarget(width: number, height: number): RenderTarget {
   return { id: crypto.randomUUID(), width, height };
+}
+
+export function createShaderProgram(config: {
+  id?: string;
+  vertexSource: string;
+  fragmentSource: string;
+}): ShaderProgram {
+  return {
+    id: config.id ?? crypto.randomUUID(),
+    vertexSource: config.vertexSource,
+    fragmentSource: config.fragmentSource,
+  };
 }
