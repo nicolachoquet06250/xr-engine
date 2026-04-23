@@ -13,8 +13,10 @@ export type {
   Texture,
   ShaderProgram,
   UniformBuffer,
+  RenderCommand,
+  RenderFrameSnapshot,
 } from './render';
 
-export { createRenderer } from './render-runtime';
+export { createRenderer, createRenderTarget } from './render-runtime';
 
 export const placeholder = 'renderer package initialized';

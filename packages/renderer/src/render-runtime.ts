@@ -1,78 +1,81 @@
-import type { Camera, Scene } from '../../scene/src';
+import type { Camera, LightComponent, MeshComponent, Scene } from '../../scene/src';
+import { LIGHT_COMPONENT, MESH_COMPONENT } from '../../scene/src';
+
+import type { Mat4 } from '../../math/src';
+import {
+  invertMat4,
+  mat4,
+  multiplyMat4,
+  transformDirection,
+  transformPoint,
+  vec3,
+} from '../../math/src';
 
 import type {
-  GeometryBuffer,
+  LightRenderData,
   Material,
   Mesh,
+  RenderCommand,
   RenderContext,
+  RenderFrameSnapshot,
   RenderTarget,
   Renderer,
   RendererConfig,
   ShaderProgram,
+  ShaderUniformValue,
   Texture,
-  UniformBuffer,
 } from './render';
 
-type DisposableResource =
-  | Mesh
-  | Texture
-  | Material
-  | ShaderProgram
-  | UniformBuffer
-  | GeometryBuffer
-  | RenderTarget;
-
-type WebGLContextLike = {
-  readonly ARRAY_BUFFER?: number;
-  readonly ELEMENT_ARRAY_BUFFER?: number;
-  readonly STATIC_DRAW?: number;
-  readonly FRAMEBUFFER?: number;
-  readonly COLOR_BUFFER_BIT?: number;
-  readonly DEPTH_BUFFER_BIT?: number;
-  readonly TRIANGLES?: number;
-  createBuffer?: () => unknown;
-  bindBuffer?: (target: number, buffer: unknown) => void;
-  bufferData?: (target: number, data: ArrayBufferView | number[] | number, usage: number) => void;
-  deleteBuffer?: (buffer: unknown) => void;
-  createFramebuffer?: () => unknown;
-  bindFramebuffer?: (target: number, framebuffer: unknown) => void;
-  deleteFramebuffer?: (framebuffer: unknown) => void;
-  createTexture?: () => unknown;
-  deleteTexture?: (texture: unknown) => void;
-  viewport?: (x: number, y: number, width: number, height: number) => void;
-  clearColor?: (r: number, g: number, b: number, a: number) => void;
-  clear?: (mask: number) => void;
-};
-
-type MeshSource = {
-  readonly vertexCount?: number;
-  readonly indexCount?: number;
-  readonly vertices?: ArrayLike<number>;
-  readonly positions?: ArrayLike<number>;
-  readonly indices?: ArrayLike<number>;
-};
+type GL = WebGLRenderingContext | WebGL2RenderingContext;
 
 type InternalMesh = Mesh & {
-  readonly buffer?: unknown;
-  readonly indexBuffer?: unknown;
+  buffer?: WebGLBuffer;
+  indexBuffer?: WebGLBuffer;
 };
 
 type InternalTexture = Texture & {
-  readonly handle?: unknown;
+  handle?: WebGLTexture;
 };
+
+type InternalMaterial = Material;
 
 type InternalRenderTarget = RenderTarget & {
-  readonly framebuffer?: unknown;
+  framebuffer?: WebGLFramebuffer;
 };
 
-type RendererState = {
-  currentTarget: InternalRenderTarget | null;
-  initialized: boolean;
+type CompiledProgram = {
+  program: WebGLProgram;
+  attribPosition: number;
+  uniforms: Map<string, WebGLUniformLocation | null>;
 };
+
+type BuildRenderCommandsResult = {
+  commands: readonly RenderCommand[];
+  culledEntityCount: number;
+};
+
+const BUILTIN_SHADER_ID = '__builtin__/unlit';
+const BUILTIN_VERTEX_SOURCE = `
+attribute vec3 a_position;
+uniform mat4 u_mvp;
+
+void main() {
+  gl_Position = u_mvp * vec4(a_position, 1.0);
+}
+`;
+const BUILTIN_FRAGMENT_SOURCE = `
+precision mediump float;
+uniform vec4 u_color;
+
+void main() {
+  gl_FragColor = u_color;
+}
+`;
 
 let meshSequence = 0;
 let textureSequence = 0;
 let materialSequence = 0;
+let shaderSequence = 0;
 let targetSequence = 0;
 
 function createMeshId(): string {
@@ -90,251 +93,576 @@ function createMaterialId(): string {
   return `material-${materialSequence}`;
 }
 
+function createShaderId(): string {
+  shaderSequence += 1;
+  return `shader-${shaderSequence}`;
+}
+
 function createTargetId(): string {
   targetSequence += 1;
   return `render-target-${targetSequence}`;
 }
 
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+function makeShaderProgram(config: {
+  id?: string;
+  vertexSource: string;
+  fragmentSource: string;
+}): ShaderProgram {
+  return Object.freeze({
+    id: config.id ?? createShaderId(),
+    vertexSource: config.vertexSource,
+    fragmentSource: config.fragmentSource,
+  });
 }
 
-function getArrayLikeLength(value: unknown): number {
-  return isObject(value) && typeof value.length === 'number' ? value.length : 0;
+function isMat4Value(value: unknown): value is Mat4 {
+  if (typeof value !== 'object' || value === null) return false;
+  const elements = (value as { elements?: unknown }).elements;
+  return Array.isArray(elements) || ArrayBuffer.isView(elements as ArrayLike<number>);
 }
 
-function inferVertexCount(data: unknown): number {
-  if (isObject(data) && typeof data.vertexCount === 'number' && Number.isFinite(data.vertexCount)) {
-    return Math.max(0, Math.floor(data.vertexCount));
-  }
-
-  const source = data as MeshSource;
-  const positionsLength = getArrayLikeLength(source?.positions);
-  if (positionsLength > 0) return Math.floor(positionsLength / 3);
-
-  const verticesLength = getArrayLikeLength(source?.vertices);
-  if (verticesLength > 0) return Math.floor(verticesLength / 3);
-
-  return getArrayLikeLength(data);
-}
-
-function inferIndexCount(data: unknown): number {
-  if (isObject(data) && typeof data.indexCount === 'number' && Number.isFinite(data.indexCount)) {
-    return Math.max(0, Math.floor(data.indexCount));
-  }
-
-  const source = data as MeshSource;
-  return getArrayLikeLength(source?.indices);
-}
-
-function inferTextureDimensions(source: unknown): { width: number; height: number } {
-  if (!isObject(source)) return { width: 0, height: 0 };
-
-  const width =
-    typeof source.width === 'number'
-      ? source.width
-      : typeof (source as Record<string, unknown>).videoWidth === 'number'
-        ? ((source as Record<string, unknown>).videoWidth as number)
-        : typeof (source as Record<string, unknown>).naturalWidth === 'number'
-          ? ((source as Record<string, unknown>).naturalWidth as number)
-          : 0;
-
-  const height =
-    typeof source.height === 'number'
-      ? source.height
-      : typeof (source as Record<string, unknown>).videoHeight === 'number'
-        ? ((source as Record<string, unknown>).videoHeight as number)
-        : typeof (source as Record<string, unknown>).naturalHeight === 'number'
-          ? ((source as Record<string, unknown>).naturalHeight as number)
-          : 0;
-
-  return {
-    width: Math.max(0, Math.floor(width)),
-    height: Math.max(0, Math.floor(height)),
-  };
-}
-
-function tryGetContext(canvas: HTMLCanvasElement, config: RendererConfig): WebGLContextLike | null {
-  const attributes = {
-    alpha: config.alpha ?? true,
-    antialias: config.antialias ?? true,
-    xrCompatible: config.xrCompatible ?? false,
-  };
-
+function isTextureValue(value: unknown): value is Texture {
   return (
-    (canvas.getContext('webgl2', attributes) as WebGLContextLike | null) ??
-    (canvas.getContext('webgl', attributes) as WebGLContextLike | null) ??
-    (canvas.getContext('experimental-webgl', attributes) as WebGLContextLike | null) ??
-    null
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof (value as Texture).id === 'string'
   );
 }
 
-class RendererImpl implements Renderer {
-  private _context: RenderContext = Object.freeze({ width: 0, height: 0, pixelRatio: 1 });
-  private canvas: HTMLCanvasElement | null = null;
-  private gl: WebGLContextLike | null = null;
-  private readonly meshes = new Map<string, InternalMesh>();
-  private readonly textures = new Map<string, InternalTexture>();
-  private readonly materials = new Map<string, Material>();
-  private readonly targets = new Map<string, InternalRenderTarget>();
-  private readonly state: RendererState = {
-    currentTarget: null,
-    initialized: false,
-  };
+function parseHexColor(color: string): readonly [number, number, number] {
+  const normalized = color.trim().replace('#', '');
+  const hex =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((char) => `${char}${char}`)
+          .join('')
+      : normalized;
 
-  public constructor(private config: RendererConfig = {}) {
+  if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
+    return [1, 1, 1];
+  }
+
+  const r = Number.parseInt(hex.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(hex.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(hex.slice(4, 6), 16) / 255;
+  return [r, g, b];
+}
+
+function createPerspective(camera: Camera, ctx: RenderContext): Mat4 {
+  const aspect = camera.aspect > 0 ? camera.aspect : ctx.width / Math.max(1, ctx.height);
+  const fov = (camera.fov * Math.PI) / 180;
+  const f = 1 / Math.tan(fov / 2);
+  const near = camera.near > 0 ? camera.near : 0.1;
+  const far = camera.far > near ? camera.far : 1000;
+
+  if (camera.projection === 'orthographic') {
+    const orthoHeight = Math.tan(fov / 2) * near || 1;
+    const top = orthoHeight;
+    const bottom = -orthoHeight;
+    const right = top * aspect;
+    const left = -right;
+
+    return mat4([
+      2 / (right - left),
+      0,
+      0,
+      0,
+      0,
+      2 / (top - bottom),
+      0,
+      0,
+      0,
+      0,
+      -2 / (far - near),
+      0,
+      -(right + left) / (right - left),
+      -(top + bottom) / (top - bottom),
+      -(far + near) / (far - near),
+      1,
+    ]);
+  }
+
+  return mat4([
+    f / aspect,
+    0,
+    0,
+    0,
+    0,
+    f,
+    0,
+    0,
+    0,
+    0,
+    (far + near) / (near - far),
+    -1,
+    0,
+    0,
+    (2 * far * near) / (near - far),
+    0,
+  ]);
+}
+
+function isVisible(mvp: Mat4): boolean {
+  const p = transformPoint(mvp, vec3(0, 0, 0));
+  return p.x >= -1.2 && p.x <= 1.2 && p.y >= -1.2 && p.y <= 1.2 && p.z >= -1.2 && p.z <= 1.2;
+}
+
+function countSwitches<T>(items: readonly T[], selector: (item: T) => string): number {
+  let count = 0;
+  let previous: string | null = null;
+
+  for (const item of items) {
+    const current = selector(item);
+    if (previous !== current) {
+      previous = current;
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
+function uploadMaterialUniform(
+  gl: GL,
+  location: WebGLUniformLocation | null,
+  value: ShaderUniformValue,
+  textures: Map<string, InternalTexture>,
+  textureUnitRef: { current: number }
+): void {
+  if (location === null) return;
+
+  if (typeof value === 'number') {
+    gl.uniform1f(location, value);
+    return;
+  }
+
+  if (typeof value === 'boolean') {
+    gl.uniform1i(location, value ? 1 : 0);
+    return;
+  }
+
+  if (isMat4Value(value)) {
+    gl.uniformMatrix4fv(location, false, value.elements as Float32List);
+    return;
+  }
+
+  if (isTextureValue(value)) {
+    const texture = textures.get(value.id);
+    if (texture?.handle) {
+      const unit = textureUnitRef.current;
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      gl.bindTexture(gl.TEXTURE_2D, texture.handle);
+      gl.uniform1i(location, unit);
+      textureUnitRef.current += 1;
+    }
+    return;
+  }
+
+  if (Array.isArray(value) || ArrayBuffer.isView(value)) {
+    const arrayValue = Array.from(value as ReadonlyArray<number>);
+    if (arrayValue.length === 2) {
+      gl.uniform2fv(location, arrayValue);
+      return;
+    }
+    if (arrayValue.length === 3) {
+      gl.uniform3fv(location, arrayValue);
+      return;
+    }
+    if (arrayValue.length === 4) {
+      gl.uniform4fv(location, arrayValue);
+    }
+  }
+}
+
+function collectDirectionalLights(scene: Scene): readonly LightRenderData[] {
+  const lights: LightRenderData[] = [];
+
+  for (const entity of scene.getEntities()) {
+    if (!entity.active) continue;
+
+    const light = entity.getComponent<LightComponent>(LIGHT_COMPONENT);
+    if (!light || !light.enabled || light.kind !== 'directional') continue;
+
+    const direction = transformDirection(entity.transform.getWorldMatrix(), vec3(0, 0, -1));
+    const color = parseHexColor(light.color);
+
+    lights.push(
+      Object.freeze({
+        lightId: entity.id,
+        direction: [direction.x, direction.y, direction.z] as const,
+        color,
+        intensity: light.intensity,
+      })
+    );
+  }
+
+  return Object.freeze(lights);
+}
+
+function buildRenderCommands(
+  scene: Scene,
+  camera: Camera,
+  ctx: RenderContext,
+  meshes: Map<string, InternalMesh>,
+  materials: Map<string, InternalMaterial>
+): BuildRenderCommandsResult {
+  const view = invertMat4(camera.entity.transform.getWorldMatrix());
+  const proj = createPerspective(camera, ctx);
+  const vp = multiplyMat4(proj, view);
+
+  const commands: RenderCommand[] = [];
+  let culledEntityCount = 0;
+
+  for (const entity of scene.getEntities()) {
+    if (!entity.active) continue;
+
+    const meshComponent = entity.getComponent<MeshComponent>(MESH_COMPONENT);
+    if (!meshComponent?.enabled || !meshComponent.meshId) continue;
+
+    const mesh = meshes.get(meshComponent.meshId);
+    if (!mesh) continue;
+
+    const material = meshComponent.materialId
+      ? (materials.get(meshComponent.materialId) ?? null)
+      : null;
+
+    const shaderId = material?.shader.id ?? BUILTIN_SHADER_ID;
+    const model = entity.transform.getWorldMatrix();
+    const mvp = multiplyMat4(vp, model);
+
+    if (!isVisible(mvp)) {
+      culledEntityCount += 1;
+      continue;
+    }
+
+    commands.push(
+      Object.freeze({
+        entityId: entity.id,
+        meshId: mesh.id,
+        materialId: meshComponent.materialId ?? '__default__',
+        shaderId,
+        modelMatrix: model,
+        viewMatrix: view,
+        projectionMatrix: proj,
+        mvpMatrix: mvp,
+        vertexCount: mesh.vertexCount,
+        indexCount: mesh.indexCount,
+      })
+    );
+  }
+
+  commands.sort(
+    (a, b) =>
+      a.shaderId.localeCompare(b.shaderId) ||
+      a.materialId.localeCompare(b.materialId) ||
+      a.meshId.localeCompare(b.meshId)
+  );
+
+  return {
+    commands: Object.freeze(commands),
+    culledEntityCount,
+  };
+}
+
+class RendererImpl implements Renderer {
+  private gl: GL | null = null;
+  private canvas: HTMLCanvasElement | null = null;
+
+  private readonly meshes = new Map<string, InternalMesh>();
+  private readonly materials = new Map<string, InternalMaterial>();
+  private readonly textures = new Map<string, InternalTexture>();
+  private readonly shaders = new Map<string, ShaderProgram>();
+  private readonly programs = new Map<string, CompiledProgram>();
+  private readonly renderTargets = new Map<string, InternalRenderTarget>();
+
+  private currentRenderTarget: InternalRenderTarget | null = null;
+  private _context: RenderContext = { width: 0, height: 0, pixelRatio: 1 };
+
+  public lastFrame: RenderFrameSnapshot | null = null;
+
+  public constructor(config: RendererConfig = {}) {
     if (config.canvas) {
       this.canvas = config.canvas;
-      this.syncContextFromCanvas(config.canvas, 1);
     }
+
+    const builtinShader = makeShaderProgram({
+      id: BUILTIN_SHADER_ID,
+      vertexSource: BUILTIN_VERTEX_SOURCE,
+      fragmentSource: BUILTIN_FRAGMENT_SOURCE,
+    });
+    this.shaders.set(builtinShader.id, builtinShader);
   }
 
   public get context(): RenderContext {
     return this._context;
   }
 
-  public async initialize(config: RendererConfig = this.config): Promise<void> {
-    this.config = { ...this.config, ...config };
-    this.canvas = this.config.canvas ?? this.canvas;
-
-    if (this.canvas) {
-      this.gl = tryGetContext(this.canvas, this.config);
-      this.syncContextFromCanvas(this.canvas, this._context.pixelRatio || 1);
+  public async initialize(config?: RendererConfig): Promise<void> {
+    if (config?.canvas) {
+      this.canvas = config.canvas;
     }
 
-    this.state.initialized = true;
+    if (!this.canvas) return;
+
+    this.gl = this.canvas.getContext('webgl2') || (this.canvas.getContext('webgl') as GL | null);
+    if (!this.gl) return;
+
+    this.gl.enable(this.gl.DEPTH_TEST);
+
+    for (const shader of this.shaders.values()) {
+      this.compile(shader);
+    }
   }
 
-  public resize(width: number, height: number, pixelRatio = this._context.pixelRatio || 1): void {
-    const normalizedWidth = Math.max(0, Math.floor(width));
-    const normalizedHeight = Math.max(0, Math.floor(height));
-    const normalizedPixelRatio = Number.isFinite(pixelRatio) && pixelRatio > 0 ? pixelRatio : 1;
-
-    this._context = Object.freeze({
-      width: normalizedWidth,
-      height: normalizedHeight,
-      pixelRatio: normalizedPixelRatio,
-    });
+  public resize(width: number, height: number, pixelRatio = 1): void {
+    this._context = { width, height, pixelRatio };
 
     if (this.canvas) {
-      this.canvas.width = Math.max(1, Math.floor(normalizedWidth * normalizedPixelRatio));
-      this.canvas.height = Math.max(1, Math.floor(normalizedHeight * normalizedPixelRatio));
+      this.canvas.width = Math.max(1, Math.floor(width * pixelRatio));
+      this.canvas.height = Math.max(1, Math.floor(height * pixelRatio));
     }
   }
 
   public render(scene: Scene, camera: Camera): void {
-    void scene;
-    void camera;
+    if (!this.gl) return;
 
-    if (!this.state.initialized) return;
+    const gl = this.gl;
+    const viewportWidth = this.currentRenderTarget?.width ?? this._context.width;
+    const viewportHeight = this.currentRenderTarget?.height ?? this._context.height;
 
-    const width = this.state.currentTarget?.width ?? this._context.width;
-    const height = this.state.currentTarget?.height ?? this._context.height;
+    gl.viewport(0, 0, viewportWidth, viewportHeight);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentRenderTarget?.framebuffer ?? null);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    if (this.gl?.viewport) {
-      this.gl.viewport(0, 0, Math.max(0, width), Math.max(0, height));
+    const lights = collectDirectionalLights(scene);
+    const { commands, culledEntityCount } = buildRenderCommands(
+      scene,
+      camera,
+      this._context,
+      this.meshes,
+      this.materials
+    );
+
+    let currentProgram: CompiledProgram | null = null;
+
+    for (const cmd of commands) {
+      const mesh = this.meshes.get(cmd.meshId);
+      if (!mesh?.buffer) continue;
+
+      const material = this.materials.get(cmd.materialId);
+      const shaderId = material?.shader.id ?? BUILTIN_SHADER_ID;
+
+      let program = this.programs.get(shaderId) ?? null;
+      if (!program) {
+        const shader = this.shaders.get(shaderId);
+        if (shader) {
+          program = this.compile(shader);
+        }
+      }
+      if (!program) continue;
+
+      if (currentProgram !== program) {
+        gl.useProgram(program.program);
+        currentProgram = program;
+      }
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+      gl.enableVertexAttribArray(program.attribPosition);
+      gl.vertexAttribPointer(program.attribPosition, 3, gl.FLOAT, false, 0, 0);
+
+      let mvpLocation = program.uniforms.get('u_mvp');
+      if (mvpLocation === undefined) {
+        mvpLocation = gl.getUniformLocation(program.program, 'u_mvp');
+        program.uniforms.set('u_mvp', mvpLocation);
+      }
+      if (mvpLocation) {
+        gl.uniformMatrix4fv(mvpLocation, false, cmd.mvpMatrix.elements as Float32List);
+      }
+
+      const primaryLight = lights[0] ?? null;
+      if (primaryLight) {
+        let lightDirLocation = program.uniforms.get('u_lightDirection');
+        if (lightDirLocation === undefined) {
+          lightDirLocation = gl.getUniformLocation(program.program, 'u_lightDirection');
+          program.uniforms.set('u_lightDirection', lightDirLocation);
+        }
+        if (lightDirLocation) {
+          gl.uniform3fv(lightDirLocation, primaryLight.direction);
+        }
+
+        let lightColorLocation = program.uniforms.get('u_lightColor');
+        if (lightColorLocation === undefined) {
+          lightColorLocation = gl.getUniformLocation(program.program, 'u_lightColor');
+          program.uniforms.set('u_lightColor', lightColorLocation);
+        }
+        if (lightColorLocation) {
+          gl.uniform3fv(lightColorLocation, primaryLight.color);
+        }
+
+        let lightIntensityLocation = program.uniforms.get('u_lightIntensity');
+        if (lightIntensityLocation === undefined) {
+          lightIntensityLocation = gl.getUniformLocation(program.program, 'u_lightIntensity');
+          program.uniforms.set('u_lightIntensity', lightIntensityLocation);
+        }
+        if (lightIntensityLocation) {
+          gl.uniform1f(lightIntensityLocation, primaryLight.intensity);
+        }
+      }
+
+      const parameters = material?.parameters ?? { u_color: [1, 1, 1, 1] as const };
+      const textureUnitRef = { current: 0 };
+
+      for (const [name, value] of Object.entries(parameters)) {
+        let location = program.uniforms.get(name);
+        if (location === undefined) {
+          location = gl.getUniformLocation(program.program, name);
+          program.uniforms.set(name, location);
+        }
+        uploadMaterialUniform(gl, location ?? null, value, this.textures, textureUnitRef);
+      }
+
+      if (mesh.indexBuffer && mesh.indexCount > 0) {
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, mesh.indexCount, gl.UNSIGNED_SHORT, 0);
+      } else {
+        gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount);
+      }
     }
 
-    if (this.gl?.bindFramebuffer && this.gl.FRAMEBUFFER !== undefined) {
-      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.state.currentTarget?.framebuffer ?? null);
-    }
-
-    if (this.gl?.clearColor) {
-      this.gl.clearColor(0, 0, 0, 0);
-    }
-
-    if (this.gl?.clear) {
-      const colorMask = this.gl.COLOR_BUFFER_BIT ?? 0;
-      const depthMask = this.gl.DEPTH_BUFFER_BIT ?? 0;
-      this.gl.clear(colorMask | depthMask);
-    }
+    this.lastFrame = {
+      commandCount: commands.length,
+      viewportWidth,
+      viewportHeight,
+      drawCallCount: commands.length,
+      visibleEntityCount: commands.length,
+      culledEntityCount,
+      materialSwitchCount: countSwitches(commands, (c) => c.materialId),
+      meshSwitchCount: countSwitches(commands, (c) => c.meshId),
+      shaderSwitchCount: countSwitches(commands, (c) => c.shaderId),
+      lightCount: lights.length,
+      commands,
+    };
   }
 
   public setRenderTarget(target: RenderTarget | null): void {
     if (target === null) {
-      this.state.currentTarget = null;
+      this.currentRenderTarget = null;
       return;
     }
 
-    const internalTarget =
-      this.targets.get(target.id) ??
-      ({ ...target, framebuffer: undefined } satisfies InternalRenderTarget);
-    this.targets.set(internalTarget.id, internalTarget);
-    this.state.currentTarget = internalTarget;
+    const existing = this.renderTargets.get(target.id);
+    if (existing) {
+      this.currentRenderTarget = existing;
+      return;
+    }
+
+    const created: InternalRenderTarget = {
+      id: target.id,
+      width: target.width,
+      height: target.height,
+    };
+
+    if (this.gl) {
+      created.framebuffer = this.gl.createFramebuffer() ?? undefined;
+    }
+
+    this.renderTargets.set(created.id, created);
+    this.currentRenderTarget = created;
   }
 
   public createMesh(data: unknown): Mesh {
     const id = createMeshId();
-    const vertexCount = inferVertexCount(data);
-    const indexCount = inferIndexCount(data);
+    const vertices = Array.isArray(data) ? data : [];
+    const mesh: InternalMesh = {
+      id,
+      vertexCount: Math.floor(vertices.length / 3),
+      indexCount: 0,
+    };
 
-    let buffer: unknown;
-    let indexBuffer: unknown;
-
-    if (this.gl?.createBuffer && this.gl?.bindBuffer && this.gl?.bufferData) {
-      if (
-        vertexCount > 0 &&
-        this.gl.ARRAY_BUFFER !== undefined &&
-        this.gl.STATIC_DRAW !== undefined
-      ) {
-        buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-        const source =
-          isObject(data) && getArrayLikeLength((data as MeshSource).vertices) > 0
-            ? Float32Array.from((data as MeshSource).vertices as ArrayLike<number>)
-            : isObject(data) && getArrayLikeLength((data as MeshSource).positions) > 0
-              ? Float32Array.from((data as MeshSource).positions as ArrayLike<number>)
-              : new Float32Array(vertexCount * 3);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, source, this.gl.STATIC_DRAW);
-      }
-
-      if (
-        indexCount > 0 &&
-        this.gl.ELEMENT_ARRAY_BUFFER !== undefined &&
-        this.gl.STATIC_DRAW !== undefined
-      ) {
-        indexBuffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        const source =
-          isObject(data) && getArrayLikeLength((data as MeshSource).indices) > 0
-            ? Uint16Array.from((data as MeshSource).indices as ArrayLike<number>)
-            : new Uint16Array(indexCount);
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, source, this.gl.STATIC_DRAW);
+    if (this.gl) {
+      mesh.buffer = this.gl.createBuffer() ?? undefined;
+      if (mesh.buffer) {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, mesh.buffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
       }
     }
 
-    const mesh: InternalMesh = Object.freeze({ id, vertexCount, indexCount, buffer, indexBuffer });
     this.meshes.set(id, mesh);
     return mesh;
   }
 
   public createTexture(source: TexImageSource | ImageBitmap | ImageData): Texture {
     const id = createTextureId();
-    const dimensions = inferTextureDimensions(source);
-    const handle = this.gl?.createTexture?.();
-    const texture: InternalTexture = Object.freeze({ id, ...dimensions, handle });
-    this.textures.set(id, texture);
-    return texture;
+    const tex: InternalTexture = {
+      id,
+      width: (source as ImageBitmap | ImageData).width ?? 0,
+      height: (source as ImageBitmap | ImageData).height ?? 0,
+    };
+
+    if (this.gl) {
+      tex.handle = this.gl.createTexture() ?? undefined;
+      if (tex.handle) {
+        this.gl.bindTexture(this.gl.TEXTURE_2D, tex.handle);
+        this.gl.texImage2D(
+          this.gl.TEXTURE_2D,
+          0,
+          this.gl.RGBA,
+          this.gl.RGBA,
+          this.gl.UNSIGNED_BYTE,
+          source
+        );
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null);
+      }
+    }
+
+    this.textures.set(id, tex);
+    return tex;
+  }
+
+  public createShaderProgram(config: {
+    id?: string;
+    vertexSource: string;
+    fragmentSource: string;
+  }): ShaderProgram {
+    const shader = makeShaderProgram(config);
+    this.shaders.set(shader.id, shader);
+
+    if (this.gl) {
+      this.compile(shader);
+    }
+
+    return shader;
   }
 
   public createMaterial(config: {
     shader: ShaderProgram;
-    parameters?: Record<string, unknown>;
+    parameters?: Record<string, ShaderUniformValue>;
   }): Material {
-    const material: Material = Object.freeze({
+    const material: InternalMaterial = Object.freeze({
       id: createMaterialId(),
       shader: config.shader,
+      parameters: Object.freeze({ ...(config.parameters ?? {}) }),
     });
+
     this.materials.set(material.id, material);
     return material;
   }
 
-  public disposeResource(resource: DisposableResource): void {
-    if ('vertexCount' in resource) {
-      const mesh = this.meshes.get(resource.id);
-      if (mesh?.buffer && this.gl?.deleteBuffer) this.gl.deleteBuffer(mesh.buffer);
-      if (mesh?.indexBuffer && this.gl?.deleteBuffer) this.gl.deleteBuffer(mesh.indexBuffer);
-      this.meshes.delete(resource.id);
+  public disposeResource(resource: Mesh | Texture | Material | ShaderProgram | RenderTarget): void {
+    if ('vertexSource' in resource && 'fragmentSource' in resource) {
+      const compiled = this.programs.get(resource.id);
+      if (compiled) {
+        this.gl?.deleteProgram(compiled.program);
+      }
+      this.programs.delete(resource.id);
+      this.shaders.delete(resource.id);
       return;
     }
 
@@ -343,44 +671,101 @@ class RendererImpl implements Renderer {
       return;
     }
 
+    if ('vertexCount' in resource) {
+      const mesh = this.meshes.get(resource.id);
+      if (mesh?.buffer) this.gl?.deleteBuffer(mesh.buffer);
+      if (mesh?.indexBuffer) this.gl?.deleteBuffer(mesh.indexBuffer);
+      this.meshes.delete(resource.id);
+      return;
+    }
+
     if ('width' in resource && 'height' in resource && this.textures.has(resource.id)) {
       const texture = this.textures.get(resource.id);
-      if (texture?.handle && this.gl?.deleteTexture) this.gl.deleteTexture(texture.handle);
+      if (texture?.handle) this.gl?.deleteTexture(texture.handle);
       this.textures.delete(resource.id);
       return;
     }
 
-    if ('width' in resource && 'height' in resource && this.targets.has(resource.id)) {
-      const target = this.targets.get(resource.id);
-      if (target?.framebuffer && this.gl?.deleteFramebuffer)
-        this.gl.deleteFramebuffer(target.framebuffer);
-      this.targets.delete(resource.id);
-      if (this.state.currentTarget?.id === resource.id) {
-        this.state.currentTarget = null;
+    if ('width' in resource && 'height' in resource && this.renderTargets.has(resource.id)) {
+      const target = this.renderTargets.get(resource.id);
+      if (target?.framebuffer) this.gl?.deleteFramebuffer(target.framebuffer);
+      this.renderTargets.delete(resource.id);
+      if (this.currentRenderTarget?.id === resource.id) {
+        this.currentRenderTarget = null;
       }
-      return;
     }
   }
 
-  private syncContextFromCanvas(canvas: HTMLCanvasElement, pixelRatio: number): void {
-    const width = Number.isFinite(canvas.width) ? canvas.width : 0;
-    const height = Number.isFinite(canvas.height) ? canvas.height : 0;
-    this._context = Object.freeze({
-      width: Math.max(0, Math.floor(width)),
-      height: Math.max(0, Math.floor(height)),
-      pixelRatio: pixelRatio > 0 ? pixelRatio : 1,
-    });
+  private compile(shader: ShaderProgram): CompiledProgram | null {
+    if (!this.gl) return null;
+    const gl = this.gl;
+
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    if (!vs || !fs) return null;
+
+    gl.shaderSource(vs, shader.vertexSource);
+    gl.compileShader(vs);
+    if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      return null;
+    }
+
+    gl.shaderSource(fs, shader.fragmentSource);
+    gl.compileShader(fs);
+    if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      return null;
+    }
+
+    const program = gl.createProgram();
+    if (!program) {
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      return null;
+    }
+
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+
+    gl.deleteShader(vs);
+    gl.deleteShader(fs);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      gl.deleteProgram(program);
+      return null;
+    }
+
+    const compiled: CompiledProgram = {
+      program,
+      attribPosition: gl.getAttribLocation(program, 'a_position'),
+      uniforms: new Map(),
+    };
+
+    this.programs.set(shader.id, compiled);
+    return compiled;
   }
 }
 
-export function createRenderer(config: RendererConfig = {}): Renderer {
+export function createRenderer(config?: RendererConfig): Renderer {
   return new RendererImpl(config);
 }
 
 export function createRenderTarget(width: number, height: number): RenderTarget {
-  return Object.freeze({
+  return {
     id: createTargetId(),
-    width: Math.max(0, Math.floor(width)),
-    height: Math.max(0, Math.floor(height)),
-  });
+    width,
+    height,
+  };
+}
+
+export function createShaderProgram(config: {
+  id?: string;
+  vertexSource: string;
+  fragmentSource: string;
+}): ShaderProgram {
+  return makeShaderProgram(config);
 }
