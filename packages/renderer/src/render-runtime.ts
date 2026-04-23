@@ -1,7 +1,4 @@
-import type {
-  Camera,
-  Scene,
-} from '../../scene/src';
+import type { Camera, Scene } from '../../scene/src';
 
 import type {
   GeometryBuffer,
@@ -239,10 +236,7 @@ class RendererImpl implements Renderer {
     }
 
     if (this.gl?.bindFramebuffer && this.gl.FRAMEBUFFER !== undefined) {
-      this.gl.bindFramebuffer(
-        this.gl.FRAMEBUFFER,
-        this.state.currentTarget?.framebuffer ?? null
-      );
+      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.state.currentTarget?.framebuffer ?? null);
     }
 
     if (this.gl?.clearColor) {
@@ -262,7 +256,9 @@ class RendererImpl implements Renderer {
       return;
     }
 
-    const internalTarget = this.targets.get(target.id) ?? ({ ...target, framebuffer: undefined } satisfies InternalRenderTarget);
+    const internalTarget =
+      this.targets.get(target.id) ??
+      ({ ...target, framebuffer: undefined } satisfies InternalRenderTarget);
     this.targets.set(internalTarget.id, internalTarget);
     this.state.currentTarget = internalTarget;
   }
@@ -276,23 +272,33 @@ class RendererImpl implements Renderer {
     let indexBuffer: unknown;
 
     if (this.gl?.createBuffer && this.gl?.bindBuffer && this.gl?.bufferData) {
-      if (vertexCount > 0 && this.gl.ARRAY_BUFFER !== undefined && this.gl.STATIC_DRAW !== undefined) {
+      if (
+        vertexCount > 0 &&
+        this.gl.ARRAY_BUFFER !== undefined &&
+        this.gl.STATIC_DRAW !== undefined
+      ) {
         buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-        const source = isObject(data) && getArrayLikeLength((data as MeshSource).vertices) > 0
-          ? Float32Array.from((data as MeshSource).vertices as ArrayLike<number>)
-          : isObject(data) && getArrayLikeLength((data as MeshSource).positions) > 0
-            ? Float32Array.from((data as MeshSource).positions as ArrayLike<number>)
-            : new Float32Array(vertexCount * 3);
+        const source =
+          isObject(data) && getArrayLikeLength((data as MeshSource).vertices) > 0
+            ? Float32Array.from((data as MeshSource).vertices as ArrayLike<number>)
+            : isObject(data) && getArrayLikeLength((data as MeshSource).positions) > 0
+              ? Float32Array.from((data as MeshSource).positions as ArrayLike<number>)
+              : new Float32Array(vertexCount * 3);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, source, this.gl.STATIC_DRAW);
       }
 
-      if (indexCount > 0 && this.gl.ELEMENT_ARRAY_BUFFER !== undefined && this.gl.STATIC_DRAW !== undefined) {
+      if (
+        indexCount > 0 &&
+        this.gl.ELEMENT_ARRAY_BUFFER !== undefined &&
+        this.gl.STATIC_DRAW !== undefined
+      ) {
         indexBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        const source = isObject(data) && getArrayLikeLength((data as MeshSource).indices) > 0
-          ? Uint16Array.from((data as MeshSource).indices as ArrayLike<number>)
-          : new Uint16Array(indexCount);
+        const source =
+          isObject(data) && getArrayLikeLength((data as MeshSource).indices) > 0
+            ? Uint16Array.from((data as MeshSource).indices as ArrayLike<number>)
+            : new Uint16Array(indexCount);
         this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, source, this.gl.STATIC_DRAW);
       }
     }
@@ -346,7 +352,8 @@ class RendererImpl implements Renderer {
 
     if ('width' in resource && 'height' in resource && this.targets.has(resource.id)) {
       const target = this.targets.get(resource.id);
-      if (target?.framebuffer && this.gl?.deleteFramebuffer) this.gl.deleteFramebuffer(target.framebuffer);
+      if (target?.framebuffer && this.gl?.deleteFramebuffer)
+        this.gl.deleteFramebuffer(target.framebuffer);
       this.targets.delete(resource.id);
       if (this.state.currentTarget?.id === resource.id) {
         this.state.currentTarget = null;

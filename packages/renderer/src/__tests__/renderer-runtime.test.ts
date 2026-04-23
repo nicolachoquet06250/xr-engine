@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { createRenderer } from '../render-runtime';
-import { createScene, addCameraComponent } from '../../scene/src';
+import { createScene, addCameraComponent } from '../../../scene/src';
 
 describe('renderer runtime', () => {
   it('can initialize without canvas', async () => {
