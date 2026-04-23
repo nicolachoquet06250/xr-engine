@@ -1,3 +1,5 @@
+/// <reference path="./webxr-shim.d.ts" />
+
 import type { Camera, LightComponent, MeshComponent, Scene } from '../../scene/src';
 import { LIGHT_COMPONENT, MESH_COMPONENT } from '../../scene/src';
 
@@ -75,7 +77,22 @@ type InstanceBatch = {
   commandIndices: readonly number[];
 };
 
+type RenderPassStats = {
+  drawCallCount: number;
+  instancedDrawCallCount: number;
+  totalInstanceCount: number;
+  instanceBatches: readonly InstanceBatch[];
+};
+
+type XRState = {
+  session: XRSession | null;
+  referenceSpace: XRReferenceSpace | null;
+  baseLayer: XRWebGLLayer | null;
+  frame: XRFrame | null;
+};
+
 const BUILTIN_SHADER_ID = '__builtin__/unlit';
+
 const BUILTIN_VERTEX_SOURCE = `
 attribute vec3 a_position;
 uniform mat4 u_mvp;
@@ -84,6 +101,7 @@ void main() {
   gl_Position = u_mvp * vec4(a_position, 1.0);
 }
 `;
+
 const BUILTIN_FRAGMENT_SOURCE = `
 precision mediump float;
 uniform vec4 u_color;
@@ -138,6 +156,10 @@ function makeShaderProgram(config: {
 
 function isWebGL2(gl: GL): gl is WebGL2RenderingContext {
   return typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext;
+}
+
+function mat4FromArrayLike(values: ArrayLike<number>): Mat4 {
+  return mat4(Array.from(values));
 }
 
 function isMat4Value(value: unknown): value is Mat4 {
@@ -353,16 +375,14 @@ function collectDirectionalLights(scene: Scene): readonly LightRenderData[] {
   return Object.freeze(lights);
 }
 
-function buildRenderCommands(
+function buildRenderCommandsForView(
   scene: Scene,
-  camera: Camera,
-  ctx: RenderContext,
   meshes: Map<string, InternalMesh>,
-  materials: Map<string, InternalMaterial>
+  materials: Map<string, InternalMaterial>,
+  viewMatrix: Mat4,
+  projectionMatrix: Mat4
 ): BuildRenderCommandsResult {
-  const view = invertMat4(camera.entity.transform.getWorldMatrix());
-  const proj = createPerspective(camera, ctx);
-  const vp = multiplyMat4(proj, view);
+  const vp = multiplyMat4(projectionMatrix, viewMatrix);
 
   const commands: RenderCommand[] = [];
   let culledEntityCount = 0;
@@ -396,8 +416,8 @@ function buildRenderCommands(
         materialId: meshComponent.materialId ?? '__default__',
         shaderId,
         modelMatrix: model,
-        viewMatrix: view,
-        projectionMatrix: proj,
+        viewMatrix,
+        projectionMatrix,
         mvpMatrix: mvp,
         vertexCount: mesh.vertexCount,
         indexCount: mesh.indexCount,
@@ -434,6 +454,13 @@ class RendererImpl implements Renderer {
 
   private instanceBuffer: WebGLBuffer | null = null;
   private instancingExt: InstancingExtension | null = null;
+
+  private readonly xrState: XRState = {
+    session: null,
+    referenceSpace: null,
+    baseLayer: null,
+    frame: null,
+  };
 
   public lastFrame: RenderFrameSnapshot | null = null;
 
@@ -487,25 +514,228 @@ class RendererImpl implements Renderer {
     }
   }
 
+  public async startXRSession(
+    mode: XRSessionMode = 'immersive-vr',
+    init: XRSessionInit = { optionalFeatures: ['local-floor'] },
+    referenceSpaceType: XRReferenceSpaceType = 'local-floor'
+  ): Promise<XRSession | null> {
+    if (typeof navigator === 'undefined' || !('xr' in navigator) || !navigator.xr) {
+      return null;
+    }
+
+    if (!this.gl) {
+      return null;
+    }
+
+    if ('makeXRCompatible' in this.gl && typeof this.gl.makeXRCompatible === 'function') {
+      await this.gl.makeXRCompatible();
+    }
+
+    const session = await navigator.xr.requestSession(mode, init);
+    await this.setXRSession(session, referenceSpaceType);
+    return session;
+  }
+
+  public async setXRSession(
+    session: XRSession,
+    referenceSpaceType: XRReferenceSpaceType = 'local-floor'
+  ): Promise<void> {
+    if (!this.gl) return;
+
+    if ('makeXRCompatible' in this.gl && typeof this.gl.makeXRCompatible === 'function') {
+      await this.gl.makeXRCompatible();
+    }
+
+    const baseLayer = new XRWebGLLayer(session, this.gl);
+    await session.updateRenderState({ baseLayer });
+
+    const referenceSpace = await session.requestReferenceSpace(referenceSpaceType);
+
+    this.xrState.session = session;
+    this.xrState.referenceSpace = referenceSpace;
+    this.xrState.baseLayer = baseLayer;
+    this.xrState.frame = null;
+
+    session.addEventListener('end', this.handleXREnd);
+  }
+
+  public setXRFrame(frame: XRFrame | null): void {
+    this.xrState.frame = frame;
+  }
+
+  public async stopXRSession(): Promise<void> {
+    const session = this.xrState.session;
+    if (!session) return;
+
+    session.removeEventListener('end', this.handleXREnd);
+    this.xrState.frame = null;
+    this.xrState.referenceSpace = null;
+    this.xrState.baseLayer = null;
+    this.xrState.session = null;
+
+    await session.end();
+  }
+
   public render(scene: Scene, camera: Camera): void {
     if (!this.gl) return;
 
-    const gl = this.gl;
+    if (
+      this.xrState.session &&
+      this.xrState.frame &&
+      this.xrState.referenceSpace &&
+      this.xrState.baseLayer
+    ) {
+      this.renderXR(scene);
+      return;
+    }
+
+    const viewMatrix = invertMat4(camera.entity.transform.getWorldMatrix());
+    const projectionMatrix = createPerspective(camera, this._context);
     const viewportWidth = this.currentRenderTarget?.width ?? this._context.width;
     const viewportHeight = this.currentRenderTarget?.height ?? this._context.height;
 
-    gl.viewport(0, 0, viewportWidth, viewportHeight);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentRenderTarget?.framebuffer ?? null);
+    const result = this.renderSingleView(
+      scene,
+      viewMatrix,
+      projectionMatrix,
+      viewportWidth,
+      viewportHeight,
+      this.currentRenderTarget?.framebuffer ?? null
+    );
+
+    this.lastFrame = {
+      commandCount: result.commands.length,
+      viewportWidth,
+      viewportHeight,
+      drawCallCount: result.drawCallCount,
+      visibleEntityCount: result.commands.length,
+      culledEntityCount: result.culledEntityCount,
+      materialSwitchCount: countSwitches(result.commands, (c) => c.materialId),
+      meshSwitchCount: countSwitches(result.commands, (c) => c.meshId),
+      shaderSwitchCount: countSwitches(result.commands, (c) => c.shaderId),
+      lightCount: result.lightCount,
+      instanceBatchCount: result.instanceBatches.length,
+      instancedDrawCallCount: result.instancedDrawCallCount,
+      totalInstanceCount: result.totalInstanceCount,
+      instanceBatches: result.instanceBatches,
+      commands: result.commands,
+    } as RenderFrameSnapshot;
+  }
+
+  private renderXR(scene: Scene): void {
+    if (
+      !this.gl ||
+      !this.xrState.frame ||
+      !this.xrState.referenceSpace ||
+      !this.xrState.baseLayer
+    ) {
+      return;
+    }
+
+    const gl = this.gl;
+    const pose = this.xrState.frame.getViewerPose(this.xrState.referenceSpace);
+    if (!pose) return;
+
+    const allCommands: RenderCommand[] = [];
+    let drawCallCount = 0;
+    let culledEntityCount = 0;
+    let instancedDrawCallCount = 0;
+    let totalInstanceCount = 0;
+    let lightCount = 0;
+    const allInstanceBatches: InstanceBatch[] = [];
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.xrState.baseLayer.framebuffer);
+
+    for (const view of pose.views) {
+      const viewport = this.xrState.baseLayer.getViewport(view);
+      if (!viewport) continue;
+
+      const viewMatrix = mat4FromArrayLike(view.transform.inverse.matrix);
+      const projectionMatrix = mat4FromArrayLike(view.projectionMatrix);
+
+      const result = this.renderSingleView(
+        scene,
+        viewMatrix,
+        projectionMatrix,
+        viewport.width,
+        viewport.height,
+        this.xrState.baseLayer.framebuffer,
+        viewport.x,
+        viewport.y
+      );
+
+      allCommands.push(...result.commands);
+      allInstanceBatches.push(...result.instanceBatches);
+      drawCallCount += result.drawCallCount;
+      culledEntityCount += result.culledEntityCount;
+      instancedDrawCallCount += result.instancedDrawCallCount;
+      totalInstanceCount += result.totalInstanceCount;
+      lightCount = Math.max(lightCount, result.lightCount);
+    }
+
+    this.lastFrame = {
+      commandCount: allCommands.length,
+      viewportWidth: this.xrState.baseLayer.framebufferWidth,
+      viewportHeight: this.xrState.baseLayer.framebufferHeight,
+      drawCallCount,
+      visibleEntityCount: allCommands.length,
+      culledEntityCount,
+      materialSwitchCount: countSwitches(allCommands, (c) => c.materialId),
+      meshSwitchCount: countSwitches(allCommands, (c) => c.meshId),
+      shaderSwitchCount: countSwitches(allCommands, (c) => c.shaderId),
+      lightCount,
+      instanceBatchCount: allInstanceBatches.length,
+      instancedDrawCallCount,
+      totalInstanceCount,
+      instanceBatches: Object.freeze(allInstanceBatches),
+      commands: Object.freeze(allCommands),
+    } as RenderFrameSnapshot;
+  }
+
+  private renderSingleView(
+    scene: Scene,
+    viewMatrix: Mat4,
+    projectionMatrix: Mat4,
+    viewportWidth: number,
+    viewportHeight: number,
+    framebuffer: WebGLFramebuffer | null,
+    viewportX = 0,
+    viewportY = 0
+  ): {
+    commands: readonly RenderCommand[];
+    culledEntityCount: number;
+    drawCallCount: number;
+    instancedDrawCallCount: number;
+    totalInstanceCount: number;
+    instanceBatches: readonly InstanceBatch[];
+    lightCount: number;
+  } {
+    if (!this.gl) {
+      return {
+        commands: [],
+        culledEntityCount: 0,
+        drawCallCount: 0,
+        instancedDrawCallCount: 0,
+        totalInstanceCount: 0,
+        instanceBatches: [],
+        lightCount: 0,
+      };
+    }
+
+    const gl = this.gl;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+    gl.viewport(viewportX, viewportY, viewportWidth, viewportHeight);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const lights = collectDirectionalLights(scene);
-    const { commands, culledEntityCount } = buildRenderCommands(
+    const { commands, culledEntityCount } = buildRenderCommandsForView(
       scene,
-      camera,
-      this._context,
       this.meshes,
-      this.materials
+      this.materials,
+      viewMatrix,
+      projectionMatrix
     );
 
     const instanceBatches = buildInstanceBatches(commands);
@@ -701,22 +931,14 @@ class RendererImpl implements Renderer {
       }
     }
 
-    this.lastFrame = {
-      commandCount: commands.length,
-      viewportWidth,
-      viewportHeight,
-      drawCallCount,
-      visibleEntityCount: commands.length,
+    return {
+      commands,
       culledEntityCount,
-      materialSwitchCount: countSwitches(commands, (c) => c.materialId),
-      meshSwitchCount: countSwitches(commands, (c) => c.meshId),
-      shaderSwitchCount: countSwitches(commands, (c) => c.shaderId),
-      lightCount: lights.length,
-      instanceBatchCount: instanceBatches.length,
+      drawCallCount,
       instancedDrawCallCount,
       totalInstanceCount,
       instanceBatches,
-      commands,
+      lightCount: lights.length,
     };
   }
 
@@ -868,6 +1090,13 @@ class RendererImpl implements Renderer {
       }
     }
   }
+
+  private readonly handleXREnd = (): void => {
+    this.xrState.session = null;
+    this.xrState.referenceSpace = null;
+    this.xrState.baseLayer = null;
+    this.xrState.frame = null;
+  };
 
   private compile(shader: ShaderProgram): CompiledProgram | null {
     if (!this.gl) return null;
