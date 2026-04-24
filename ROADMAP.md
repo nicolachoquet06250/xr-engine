@@ -998,9 +998,9 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ---
 
-## 16. Construire la couche audio → On en est là
+## 16. Construire la couche audio ✅
 
-### 16.1 MVP audio
+### 16.1 MVP audio ✅
 
 - listener
 - audio source 3D
@@ -1009,14 +1009,14 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 - volume
 - distance attenuation
 
-### 16.2 Intégration gameplay
+### 16.2 Intégration gameplay ✅
 
 - feedback de grab
 - feedback de poke
 - feedback de menu
 - ambiance de scène
 
-### 16.3 Phase 2
+### 16.3 Phase 2 ✅
 
 - mixers
 - buses
@@ -1025,7 +1025,7 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ---
 
-## 17. Construire la couche assets
+## 17. Construire la couche assets → On en est là
 
 ### 17.1 Types d’assets
 

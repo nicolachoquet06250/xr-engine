@@ -18,6 +18,14 @@ export interface AudioSourceState {
   readonly volume: number;
 }
 
+export interface AudioSourceRuntimeState extends AudioSourceState {
+  readonly effectiveVolume: number;
+  readonly attenuation: number;
+  readonly clipId: string | null;
+  readonly busId: string;
+  readonly spatial: boolean;
+}
+
 export interface AudioPlaybackHandle {
   readonly id: string;
 }
@@ -27,15 +35,23 @@ export interface AudioBus {
   volume: number;
 }
 
+export interface AudioEffect {
+  readonly id: string;
+  readonly type: string;
+  readonly enabled: boolean;
+}
+
 export interface AudioListener {
   readonly id: string;
   setPosition(position: Vec3): void;
+  getPosition(): Vec3;
 }
 
 export interface AudioSource {
   readonly id: string;
-  readonly state: AudioSourceState;
+  readonly state: AudioSourceRuntimeState;
   setPosition(position: Vec3): void;
+  getPosition(): Vec3;
   setLoop(loop: boolean): void;
   setVolume(volume: number): void;
   play(clip?: AudioClip): AudioPlaybackHandle;
@@ -44,13 +60,65 @@ export interface AudioSource {
   resume(): void;
 }
 
+export interface CreateAudioSystemOptions {
+  readonly masterVolume?: number;
+}
+
 export interface AudioSystem {
-  createSource(config?: SpatialAudioConfig): AudioSource;
-  play(clip: AudioClip, options?: SpatialAudioConfig): AudioPlaybackHandle;
+  createSource(
+    config?: SpatialAudioConfig & {
+      readonly volume?: number;
+      readonly loop?: boolean;
+      readonly position?: Vec3;
+      readonly busId?: string;
+    }
+  ): AudioSource;
+  play(
+    clip: AudioClip,
+    options?: SpatialAudioConfig & {
+      readonly volume?: number;
+      readonly loop?: boolean;
+      readonly position?: Vec3;
+      readonly busId?: string;
+    }
+  ): AudioPlaybackHandle;
   stop(handle: AudioPlaybackHandle): void;
   pause(handle: AudioPlaybackHandle): void;
   resume(handle: AudioPlaybackHandle): void;
+  createListener(id?: string): AudioListener;
   setListener(listener: AudioListener): void;
+  getListener(): AudioListener;
+  createBus(id?: string, volume?: number): AudioBus;
+  getBus(id: string): AudioBus | null;
+  addEffect(effect: AudioEffect): void;
+  removeEffect(effectId: string): void;
+  getEffects(): readonly AudioEffect[];
 }
 
-export declare function createAudioSystem(): AudioSystem;
+export interface AudioFeedbackClips {
+  readonly grab: AudioClip;
+  readonly poke: AudioClip;
+  readonly menu: AudioClip;
+  readonly ambience?: AudioClip;
+}
+
+export interface AudioGameplayFeedback {
+  onGrabFeedback(position?: Vec3): void;
+  onPokeFeedback(position?: Vec3): void;
+  onMenuFeedback(): void;
+  startAmbience(): void;
+  stopAmbience(): void;
+}
+
+export declare function createAudioSystem(options?: CreateAudioSystemOptions): AudioSystem;
+
+export declare function createAudioGameplayFeedback(
+  system: AudioSystem,
+  clips: AudioFeedbackClips,
+  options?: {
+    readonly uiBusId?: string;
+    readonly worldBusId?: string;
+    readonly ambienceLoop?: boolean;
+    readonly ambienceVolume?: number;
+  }
+): AudioGameplayFeedback;
