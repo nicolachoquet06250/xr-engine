@@ -3,11 +3,15 @@ export type {
   AudioBus,
   AudioSource,
   AudioSourceState,
+  AudioSourceRuntimeState,
   AudioListener,
   AudioSystem,
   AudioPlaybackHandle,
   SpatialAudioConfig,
+  AudioEffect,
+  CreateAudioSystemOptions,
+  AudioFeedbackClips,
+  AudioGameplayFeedback,
 } from './audio';
 
-// Placeholder for audio package
-export const placeholder = 'audio package initialized';
+export { createAudioGameplayFeedback, createAudioSystem } from './audio-runtime';
