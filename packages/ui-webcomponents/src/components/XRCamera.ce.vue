@@ -3,15 +3,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, watch, toRefs } from 'vue';
 
-const props = defineProps<{
+const {entityId, active, fov, near, far} = toRefs(withDefaults(defineProps<{
   entityId?: string;
   active?: boolean;
   fov?: number;
   near?: number;
   far?: number;
-}>();
+}>(), {
+  entityId: '',
+  active: true,
+  fov: 60,
+  near: 0.1,
+  far: 1000,
+}));
 
 const emit = defineEmits<{
   (event: 'xr-camera-mounted', detail: { entityId: string; active: boolean }): void;
@@ -20,12 +26,6 @@ const emit = defineEmits<{
   (event: 'xr-camera-projection-changed', detail: { fov: number; near: number; far: number }): void;
   (event: 'xr-camera-entity-bound', detail: { entityId: string }): void;
 }>();
-
-const entityId = ref(props.entityId ?? '');
-const active = ref(props.active ?? true);
-const fov = ref(props.fov ?? 60);
-const near = ref(props.near ?? 0.1);
-const far = ref(props.far ?? 1000);
 
 function bindToEntity(nextEntityId: string): void {
   entityId.value = nextEntityId;
@@ -54,10 +54,10 @@ function getState(): { entityId: string; active: boolean; fov: number; near: num
   };
 }
 
-watch(() => props.entityId, (value) => typeof value === 'string' && bindToEntity(value));
-watch(() => props.active, (value) => typeof value === 'boolean' && setActive(value));
+watch(entityId, (value) => bindToEntity(value));
+watch(active, (value) => setActive(value));
 watch(
-  () => [props.fov, props.near, props.far] as const,
+  [fov, near, far] as const,
   ([nextFov, nextNear, nextFar]) =>
     setProjection(nextFov ?? 60, nextNear ?? 0.1, nextFar ?? 1000)
 );

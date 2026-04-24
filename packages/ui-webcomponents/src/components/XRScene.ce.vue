@@ -3,13 +3,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import {onMounted, onUnmounted, toRefs, watch} from 'vue';
 
-const props = defineProps<{
+const {sceneId, active, loaded} = toRefs(withDefaults(defineProps<{
   sceneId?: string;
   active?: boolean;
   loaded?: boolean;
-}>();
+}>(), {
+  sceneId: 'default',
+  active: true,
+  loaded: false,
+}));
 
 const emit = defineEmits<{
   (event: 'xr-scene-mounted', detail: { sceneId: string; active: boolean; loaded: boolean }): void;
@@ -18,10 +22,6 @@ const emit = defineEmits<{
   (event: 'xr-scene-loaded-changed', detail: { sceneId: string; loaded: boolean }): void;
   (event: 'xr-scene-id-changed', detail: { previousSceneId: string; sceneId: string }): void;
 }>();
-
-const sceneId = ref(props.sceneId ?? 'default');
-const active = ref(props.active ?? true);
-const loaded = ref(props.loaded ?? false);
 
 function publishActivity(): void {
   emit('xr-scene-activity-changed', { sceneId: sceneId.value, active: active.value });
@@ -55,9 +55,9 @@ function getState(): { sceneId: string; active: boolean; loaded: boolean } {
   };
 }
 
-watch(() => props.sceneId, (value) => value && setSceneId(value));
-watch(() => props.active, (value) => typeof value === 'boolean' && setActive(value));
-watch(() => props.loaded, (value) => typeof value === 'boolean' && setLoaded(value));
+watch(sceneId, (value) => value && setSceneId(value));
+watch(active, (value) => setActive(value));
+watch(loaded, (value) => setLoaded(value));
 
 onMounted(() => {
   emit('xr-scene-mounted', {

@@ -3,13 +3,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import {onMounted, onUnmounted, toRefs, watch} from 'vue';
 
-const props = defineProps<{
+const {open, metricsTarget, refreshRate} = toRefs(withDefaults(defineProps<{
   open?: boolean;
   metricsTarget?: string;
   refreshRate?: number;
-}>();
+}>(), {
+  open: false,
+  metricsTarget: 'runtime',
+  refreshRate: 15,
+}));
 
 const emit = defineEmits<{
   (event: 'xr-debug-panel-mounted', detail: { open: boolean; metricsTarget: string }): void;
@@ -17,10 +21,6 @@ const emit = defineEmits<{
   (event: 'xr-debug-panel-open-changed', detail: { open: boolean }): void;
   (event: 'xr-debug-panel-target-changed', detail: { metricsTarget: string }): void;
 }>();
-
-const open = ref(props.open ?? false);
-const metricsTarget = ref(props.metricsTarget ?? 'runtime');
-const refreshRate = ref(props.refreshRate ?? 15);
 
 function openPanel(): void {
   open.value = true;
@@ -51,9 +51,9 @@ function getState(): { open: boolean; metricsTarget: string; refreshRate: number
   };
 }
 
-watch(() => props.open, (value) => typeof value === 'boolean' && (value ? openPanel() : closePanel()));
-watch(() => props.metricsTarget, (value) => typeof value === 'string' && setMetricsTarget(value));
-watch(() => props.refreshRate, (value) => typeof value === 'number' && (refreshRate.value = value));
+watch(open, (value) => value ? openPanel() : closePanel());
+watch(metricsTarget, (value) => setMetricsTarget(value));
+watch(refreshRate, (value) => refreshRate.value = value);
 
 onMounted(() => {
   emit('xr-debug-panel-mounted', {

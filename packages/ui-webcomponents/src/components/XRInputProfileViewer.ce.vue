@@ -3,14 +3,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import {onMounted, onUnmounted, toRefs, watch} from 'vue';
 
-const props = defineProps<{
+const {profileId, deviceKind, layout, activeControl} = toRefs(withDefaults(defineProps<{
   profileId?: string;
   deviceKind?: string;
   layout?: 'grid' | 'list';
-  activeControl?: string;
-}>();
+  activeControl?: string|null;
+}>(), {
+  profileId: '',
+  deviceKind: 'unknown',
+  layout: 'grid',
+  activeControl: null
+}));
 
 const emit = defineEmits<{
   (event: 'xr-input-profile-viewer-mounted', detail: { profileId: string; deviceKind: string }): void;
@@ -19,11 +24,6 @@ const emit = defineEmits<{
   (event: 'xr-input-profile-viewer-layout-changed', detail: { layout: 'grid' | 'list' }): void;
   (event: 'xr-input-profile-viewer-control-focused', detail: { controlId: string | null }): void;
 }>();
-
-const profileId = ref(props.profileId ?? '');
-const deviceKind = ref(props.deviceKind ?? 'unknown');
-const layout = ref<'grid' | 'list'>(props.layout ?? 'grid');
-const activeControl = ref<string | null>(props.activeControl ?? null);
 
 function setProfile(nextProfileId: string, nextDeviceKind: string): void {
   profileId.value = nextProfileId;
@@ -65,10 +65,10 @@ function getState(): {
   };
 }
 
-watch(() => props.profileId, (value) => typeof value === 'string' && setProfile(value, deviceKind.value));
-watch(() => props.deviceKind, (value) => typeof value === 'string' && setProfile(profileId.value, value));
-watch(() => props.layout, (value) => value && setLayout(value));
-watch(() => props.activeControl, (value) => focusControl(value ?? null));
+watch(profileId, (value) => setProfile(value, deviceKind.value));
+watch(deviceKind, (value) => setProfile(profileId.value, value));
+watch(layout, (value) => value && setLayout(value));
+watch(activeControl, (value) => focusControl(value ?? null));
 
 onMounted(() => {
   emit('xr-input-profile-viewer-mounted', {

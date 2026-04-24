@@ -3,14 +3,19 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import {onMounted, onUnmounted, ref, toRefs, watch} from 'vue';
 
-const props = defineProps<{
+const {hand, showJoints, showPinch, showPoke} = toRefs(withDefaults(defineProps<{
   hand?: 'left' | 'right';
   showJoints?: boolean;
   showPinch?: boolean;
   showPoke?: boolean;
-}>();
+}>(), {
+  hand: 'left',
+  showJoints: true,
+  showPinch: true,
+  showPoke: true,
+}));
 
 const emit = defineEmits<{
   (event: 'xr-hand-debug-mounted', detail: { hand: 'left' | 'right' }): void;
@@ -29,10 +34,6 @@ const emit = defineEmits<{
   }): void;
 }>();
 
-const hand = ref<'left' | 'right'>(props.hand ?? 'left');
-const showJoints = ref(props.showJoints ?? true);
-const showPinch = ref(props.showPinch ?? true);
-const showPoke = ref(props.showPoke ?? true);
 const trackingValid = ref(false);
 const pinchStrength = ref(0);
 const pokeDistance = ref(0);
@@ -91,9 +92,9 @@ function getState(): {
   };
 }
 
-watch(() => props.hand, (value) => value && (hand.value = value));
+watch(hand, (value) => value && (hand.value = value));
 watch(
-  () => [props.showJoints, props.showPinch, props.showPoke] as const,
+  [showJoints, showPinch, showPoke] as const,
   ([nextShowJoints, nextShowPinch, nextShowPoke]) =>
     setVisibilityFlags({
       showJoints: nextShowJoints,

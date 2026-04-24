@@ -3,15 +3,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import {onMounted, onUnmounted, toRefs, watch} from 'vue';
 
-const props = defineProps<{
+const {entityId, parentId, visible, selected, enabled} = toRefs(withDefaults(defineProps<{
   entityId?: string;
-  parentId?: string;
+  parentId?: string|null;
   visible?: boolean;
   selected?: boolean;
   enabled?: boolean;
-}>();
+}>(), {
+  entityId: '',
+  parentId: null,
+  visible: true,
+  selected: false,
+  enabled: true,
+}));
 
 const emit = defineEmits<{
   (event: 'xr-entity-mounted', detail: { entityId: string; parentId: string | null }): void;
@@ -21,12 +27,6 @@ const emit = defineEmits<{
   (event: 'xr-entity-enabled-changed', detail: { entityId: string; enabled: boolean }): void;
   (event: 'xr-entity-parent-changed', detail: { entityId: string; parentId: string | null }): void;
 }>();
-
-const entityId = ref(props.entityId ?? '');
-const parentId = ref<string | null>(props.parentId ?? null);
-const visible = ref(props.visible ?? true);
-const selected = ref(props.selected ?? false);
-const enabled = ref(props.enabled ?? true);
 
 function setVisible(nextVisible: boolean): void {
   visible.value = nextVisible;
@@ -64,11 +64,11 @@ function getState(): {
   };
 }
 
-watch(() => props.entityId, (value) => typeof value === 'string' && (entityId.value = value));
-watch(() => props.parentId, (value) => setParent(value ?? null));
-watch(() => props.visible, (value) => typeof value === 'boolean' && setVisible(value));
-watch(() => props.selected, (value) => typeof value === 'boolean' && setSelected(value));
-watch(() => props.enabled, (value) => typeof value === 'boolean' && setEnabled(value));
+watch(entityId, (value) => entityId.value = value);
+watch(parentId, (value) => setParent(value ?? null));
+watch(visible, (value) => setVisible(value));
+watch(selected, (value) => setSelected(value));
+watch(enabled, (value) => setEnabled(value));
 
 onMounted(() => {
   emit('xr-entity-mounted', {

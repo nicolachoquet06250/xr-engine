@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, onUnmounted, ref, watch } from 'vue';
+import {getCurrentInstance, onMounted, onUnmounted, ref, toRefs, watch} from 'vue';
 
 import type {
   UIAction,
@@ -14,11 +14,15 @@ import type {
   XRRuntimeAttachedEventDetail,
 } from '../web-component';
 
-const props = defineProps<{
+const {route, debug, menuOpen} = toRefs(withDefaults(defineProps<{
   route?: string;
   debug?: boolean;
   menuOpen?: boolean;
-}>();
+}>(), {
+  route: '/',
+  debug: false,
+  menuOpen: false,
+}));
 
 const emit = defineEmits<{
   (event: 'xr-engine-ready', detail: XREngineReadyEventDetail): void;
@@ -27,9 +31,6 @@ const emit = defineEmits<{
   (event: 'xr-runtime-attached', detail: XRRuntimeAttachedEventDetail): void;
 }>();
 
-const route = ref(props.route ?? '/');
-const debug = ref(props.debug ?? false);
-const menuOpen = ref(props.menuOpen ?? false);
 const runtimeAttached = ref(false);
 
 function getHost(): XREngineElement | null {
@@ -82,29 +83,20 @@ function getSnapshot(): UIBridgeSnapshot {
   return createSnapshot();
 }
 
-watch(
-  () => props.route,
-  (value) => {
-    route.value = value ?? '/';
-    publishSnapshot();
-  }
-);
+watch(route, (value) => {
+  route.value = value ?? '/';
+  publishSnapshot();
+});
 
-watch(
-  () => props.debug,
-  (value) => {
-    debug.value = value ?? false;
-    publishSnapshot();
-  }
-);
+watch(debug, (value) => {
+  debug.value = value ?? false;
+  publishSnapshot();
+});
 
-watch(
-  () => props.menuOpen,
-  (value) => {
-    menuOpen.value = value ?? false;
-    publishSnapshot();
-  }
-);
+watch(menuOpen, (value) => {
+  menuOpen.value = value ?? false;
+  publishSnapshot();
+});
 
 onMounted(() => {
   emit('xr-engine-ready', {
