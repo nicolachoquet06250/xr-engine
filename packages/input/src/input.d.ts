@@ -51,11 +51,11 @@ export interface RawInputEvent {
 }
 
 export interface InputActionState<T = InputSignalValue> {
-  readonly name: string;
-  readonly value: T;
-  readonly pressed: boolean;
-  readonly released: boolean;
-  readonly held: boolean;
+  name: string;
+  value: T;
+  pressed: boolean;
+  released: boolean;
+  held: boolean;
 }
 
 export interface InputBinding {
@@ -108,9 +108,9 @@ export type InteractionIntentName =
   | 'uiPress';
 
 export interface InteractionIntent<T = InputSignalValue> {
-  readonly name: InteractionIntentName;
-  readonly value: T;
-  readonly active: boolean;
+  name: InteractionIntentName;
+  value: T;
+  active: boolean;
 }
 
 export interface InputSystem {

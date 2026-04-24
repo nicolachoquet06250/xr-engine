@@ -102,8 +102,18 @@ describe('inferSignalType', () => {
     expect(inferSignalType('grip/grab', 1)).toBe('grab-state');
     expect(inferSignalType('finger/poke', true)).toBe('poke-state');
     expect(inferSignalType('hand/pinch', true)).toBe('pinch-state');
-    expect(inferSignalType('head/pose', { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0, w: 1 } })).toBe('pose');
-    expect(inferSignalType('pointer/ray', { origin: { x: 0, y: 0, z: 0 }, direction: { x: 0, y: 0, z: -1 } })).toBe('ray');
+    expect(
+      inferSignalType('head/pose', {
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0, w: 1 },
+      })
+    ).toBe('pose');
+    expect(
+      inferSignalType('pointer/ray', {
+        origin: { x: 0, y: 0, z: 0 },
+        direction: { x: 0, y: 0, z: -1 },
+      })
+    ).toBe('ray');
     expect(inferSignalType('tracking/valid', true)).toBe('tracking-validity');
     expect(inferSignalType('left-stick', { x: 0, y: 0 })).toBe('axis');
   });

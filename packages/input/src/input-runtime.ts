@@ -98,7 +98,11 @@ export function inferSignalType(path: string, value: unknown): InputSignalType {
   if (typeof value === 'boolean') return 'button';
 
   if (typeof value === 'number') {
-    if (normalizedPath.includes('axis') || normalizedPath.includes('stick') || normalizedPath.includes('trigger')) {
+    if (
+      normalizedPath.includes('axis') ||
+      normalizedPath.includes('stick') ||
+      normalizedPath.includes('trigger')
+    ) {
       return 'axis';
     }
     return 'button';
@@ -264,7 +268,11 @@ class InputSystemImpl implements InputSystem {
     this.updateIntents();
   }
 
-  private pushNormalizedSignal(adapter: InputDeviceAdapter, event: RawInputEvent, fallbackTimestamp: number): void {
+  private pushNormalizedSignal(
+    adapter: InputDeviceAdapter,
+    event: RawInputEvent,
+    fallbackTimestamp: number
+  ): void {
     const type = inferSignalType(event.path, event.value);
     const signal: NormalizedInputSignal = {
       id: `${adapter.id}:${event.path}:${this.signals.length}`,
