@@ -1,6 +1,3 @@
-import { addVec3, dotVec3, lengthVec3, normalizeVec3, scaleVec3, subVec3, vec3 } from '@xr-engine/math';
-
-import type { Entity } from '@xr-engine/scene';
 import type {
   CapsuleCollider,
   CharacterController,
@@ -16,8 +13,18 @@ import type {
   RigidBodyType,
   TriggerEvent,
 } from './physics';
-
+import type { Entity } from '@xr-engine/scene';
 type Shape = 'box' | 'sphere' | 'capsule' | 'mesh';
+
+import {
+  addVec3,
+  dotVec3,
+  lengthVec3,
+  normalizeVec3,
+  scaleVec3,
+  subVec3,
+  vec3,
+} from '@xr-engine/math';
 
 type MutableVec3 = { x: number; y: number; z: number };
 
@@ -127,7 +134,11 @@ class RigidBodyImpl implements RigidBody {
 
   public setKinematic(enabled: boolean): void {
     this.state.kinematic = enabled;
-    this.state.type = enabled ? 'kinematic' : this.state.type === 'kinematic' ? 'dynamic' : this.state.type;
+    this.state.type = enabled
+      ? 'kinematic'
+      : this.state.type === 'kinematic'
+        ? 'dynamic'
+        : this.state.type;
   }
 
   public setCcdEnabled(enabled: boolean): void {
@@ -195,7 +206,9 @@ class PhysicsWorldImpl implements PhysicsWorld {
       }
 
       if (next.y < 0) {
-        const bodyCollider = [...this.colliders.values()].find((candidate) => candidate.rigidBody === body);
+        const bodyCollider = [...this.colliders.values()].find(
+          (candidate) => candidate.rigidBody === body
+        );
         const material = bodyCollider?.material;
         const restitution = Math.max(0, Math.min(1, material?.restitution ?? 0.1));
         const friction = Math.max(0, Math.min(1, material?.friction ?? 0.5));
@@ -233,7 +246,10 @@ class PhysicsWorldImpl implements PhysicsWorld {
   }
 
   public raycast(
-    ray: { origin: { x: number; y: number; z: number }; direction: { x: number; y: number; z: number } },
+    ray: {
+      origin: { x: number; y: number; z: number };
+      direction: { x: number; y: number; z: number };
+    },
     options?: { maxDistance?: number }
   ): RaycastHit | null {
     const maxDistance = options?.maxDistance ?? Infinity;
@@ -266,7 +282,10 @@ class PhysicsWorldImpl implements PhysicsWorld {
     return closest;
   }
 
-  public overlapSphere(center: { x: number; y: number; z: number }, radius: number): readonly Collider[] {
+  public overlapSphere(
+    center: { x: number; y: number; z: number },
+    radius: number
+  ): readonly Collider[] {
     return Object.freeze(
       [...this.colliders.values()]
         .filter((collider) => intersectsSphere(collider, center, radius))
@@ -274,13 +293,24 @@ class PhysicsWorldImpl implements PhysicsWorld {
     );
   }
 
-  public overlapCapsule(pointA: { x: number; y: number; z: number }, pointB: { x: number; y: number; z: number }, radius: number): readonly Collider[] {
-    const mid = vec3((pointA.x + pointB.x) * 0.5, (pointA.y + pointB.y) * 0.5, (pointA.z + pointB.z) * 0.5);
+  public overlapCapsule(
+    pointA: { x: number; y: number; z: number },
+    pointB: { x: number; y: number; z: number },
+    radius: number
+  ): readonly Collider[] {
+    const mid = vec3(
+      (pointA.x + pointB.x) * 0.5,
+      (pointA.y + pointB.y) * 0.5,
+      (pointA.z + pointB.z) * 0.5
+    );
     const extent = lengthVec3(subVec3(pointB, pointA)) * 0.5;
     return this.overlapSphere(mid, radius + extent);
   }
 
-  public findPinchTargets(center: { x: number; y: number; z: number }, radius = 0.03): readonly Collider[] {
+  public findPinchTargets(
+    center: { x: number; y: number; z: number },
+    radius = 0.03
+  ): readonly Collider[] {
     return this.overlapSphere(center, radius);
   }
 
@@ -311,7 +341,7 @@ class PhysicsWorldImpl implements PhysicsWorld {
     height?: number;
   }): Collider {
     colliderSequence += 1;
-    const bodyState = config.rigidBody ? this.bodies.get(config.rigidBody.id) ?? null : null;
+    const bodyState = config.rigidBody ? (this.bodies.get(config.rigidBody.id) ?? null) : null;
     const state: ColliderState = {
       id: nextId('collider', colliderSequence),
       entity: config.entity ?? bodyState?.entity ?? null,
@@ -330,10 +360,17 @@ class PhysicsWorldImpl implements PhysicsWorld {
   public createCharacterController(config?: { entity?: Entity | null }): CharacterController {
     controllerSequence += 1;
     const body = this.createRigidBody({ entity: config?.entity ?? null, type: 'kinematic' });
-    return new CharacterControllerImpl(nextId('character-controller', controllerSequence), body as RigidBodyImpl);
+    return new CharacterControllerImpl(
+      nextId('character-controller', controllerSequence),
+      body as RigidBodyImpl
+    );
   }
 
-  public createJoint(config: { bodyA: RigidBody; bodyB: RigidBody; type: 'fixed' | 'hinge' | 'slider' }): PhysicsJoint {
+  public createJoint(config: {
+    bodyA: RigidBody;
+    bodyB: RigidBody;
+    type: 'fixed' | 'hinge' | 'slider';
+  }): PhysicsJoint {
     jointSequence += 1;
     const joint: PhysicsJoint = { id: nextId('joint', jointSequence), ...config };
     this.joints.set(joint.id, joint);
@@ -367,7 +404,10 @@ class PhysicsWorldImpl implements PhysicsWorld {
   private createContactHit(self: ColliderState, other: ColliderState): RaycastHit | null {
     const selfCenter = colliderCenter(self);
     const otherCenter = colliderCenter(other);
-    const direction = subVec3(vec3(otherCenter.x, otherCenter.y, otherCenter.z), vec3(selfCenter.x, selfCenter.y, selfCenter.z));
+    const direction = subVec3(
+      vec3(otherCenter.x, otherCenter.y, otherCenter.z),
+      vec3(selfCenter.x, selfCenter.y, selfCenter.z)
+    );
     const normal = normalizeVec3(direction);
     if (lengthVec3(normal) === 0) return null;
 
@@ -391,8 +431,14 @@ class PhysicsWorldImpl implements PhysicsWorld {
       material: state.material,
     };
 
-    if (state.shape === 'box') return Object.freeze({ ...base, type: 'box', size: vec3(state.size.x, state.size.y, state.size.z) });
-    if (state.shape === 'sphere') return Object.freeze({ ...base, type: 'sphere', radius: state.radius });
+    if (state.shape === 'box')
+      return Object.freeze({
+        ...base,
+        type: 'box',
+        size: vec3(state.size.x, state.size.y, state.size.z),
+      });
+    if (state.shape === 'sphere')
+      return Object.freeze({ ...base, type: 'sphere', radius: state.radius });
     if (state.shape === 'capsule') {
       const capsule: CapsuleCollider = {
         ...base,

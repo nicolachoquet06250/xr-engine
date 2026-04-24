@@ -845,13 +845,13 @@ Utiliser un hybride :
 
 ---
 
-## 12. Intégrer la physique → On en est là
+## 12. Intégrer la physique ✅
 
-### 12.1 Stratégie
+### 12.1 Stratégie ✅
 
 Créer une abstraction de backend stable.
 
-### 12.2 Fonctionnalités MVP
+### 12.2 Fonctionnalités MVP ✅
 
 - rigid bodies
 - colliders
@@ -860,14 +860,14 @@ Créer une abstraction de backend stable.
 - triggers
 - restitution / friction
 
-### 12.3 Fonctionnalités phase 2
+### 12.3 Fonctionnalités phase 2 ✅
 
 - character controller
 - joints
 - CCD
 - contraintes avancées
 
-### 12.4 Hand interaction et physique
+### 12.4 Hand interaction et physique ✅
 
 Prévoir :
 
@@ -878,7 +878,7 @@ Prévoir :
 
 ---
 
-## 13. Construire le système d’input unifié
+## 13. Construire le système d’input unifié → On en est là
 
 ### 13.1 Pipeline
 
