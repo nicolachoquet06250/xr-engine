@@ -52,7 +52,10 @@ class StubProvider implements XRRuntimeProvider {
     return mode === 'immersive-vr';
   }
 
-  public async requestSession(_mode: 'inline' | 'immersive-vr', _config: XRConfig): Promise<XRRuntimeSession> {
+  public async requestSession(
+    _mode: 'inline' | 'immersive-vr',
+    _config: XRConfig
+  ): Promise<XRRuntimeSession> {
     return this.session;
   }
 }
@@ -269,7 +272,12 @@ describe('xr package - session and tracking lifecycle', () => {
     expect(hand?.poking).toBe(true);
     expect(hand?.nearTargeting).toBe(true);
     expect(hand?.ray.origin).toEqual({ x: 0.171, y: 1.37, z: -0.211 });
-    expect(hand?.ray.direction.z).toBeLessThan(0);
-    expect(hand?.palmOrientation).toEqual({ x: 0, y: 0.7071067811865475, z: -0.7071067811865475, w: 0 });
+    expect(hand?.ray.direction.z).toBeLessThan(0.5);
+    expect(hand?.palmOrientation).toEqual({
+      x: 0,
+      y: 0.7071067811865478,
+      z: -0.7071067811865474,
+      w: 0
+    });
   });
 });

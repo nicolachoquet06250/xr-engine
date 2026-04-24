@@ -1,5 +1,3 @@
-export { createXRManager } from './xr-runtime';
-
 export type {
   Handedness,
   XRConfig,
@@ -24,3 +22,5 @@ export type {
   XRTrackingSnapshot,
   XRTrackingState,
 } from './xr';
+
+export { createXRManager } from './xr-runtime';

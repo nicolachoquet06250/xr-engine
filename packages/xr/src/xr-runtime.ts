@@ -1,5 +1,3 @@
-import type { Quat, Vec3 } from '@xr-engine/math';
-
 import type {
   Handedness,
   XRConfig,
@@ -20,8 +18,9 @@ import type {
   XRTrackingCapabilities,
   XRTrackingMode,
   XRTrackingSnapshot,
-  XRTrackingState,
 } from './xr';
+
+import type { Quat, Vec3 } from '@xr-engine/math';
 
 const PINCH_DISTANCE_THRESHOLD = 0.03;
 const PINCH_RELEASE_DISTANCE_THRESHOLD = 0.04;
@@ -65,7 +64,9 @@ function subtract(a: Vec3, b: Vec3): Vec3 {
   return Object.freeze({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
 }
 
-function freezeButtons(buttons: Readonly<Record<string, number | boolean>> | undefined): Readonly<Record<string, number | boolean>> {
+function freezeButtons(
+  buttons: Readonly<Record<string, number | boolean>> | undefined
+): Readonly<Record<string, number | boolean>> {
   return Object.freeze({ ...(buttons ?? {}) });
 }
 
@@ -85,7 +86,8 @@ function trackingModeFromStates(
 ): XRTrackingMode {
   const controllerTracked =
     leftController?.trackingState === 'tracked' || rightController?.trackingState === 'tracked';
-  const handsTracked = leftHand?.trackingState === 'tracked' || rightHand?.trackingState === 'tracked';
+  const handsTracked =
+    leftHand?.trackingState === 'tracked' || rightHand?.trackingState === 'tracked';
 
   if (controllerTracked && handsTracked) return 'mixed';
   if (controllerTracked) return 'controllers-only';
@@ -94,13 +96,14 @@ function trackingModeFromStates(
 }
 
 function choosePinchState(previousPinching: boolean, distanceMeters: number): boolean {
-  const threshold = previousPinching
-    ? PINCH_RELEASE_DISTANCE_THRESHOLD
-    : PINCH_DISTANCE_THRESHOLD;
+  const threshold = previousPinching ? PINCH_RELEASE_DISTANCE_THRESHOLD : PINCH_DISTANCE_THRESHOLD;
   return distanceMeters <= threshold;
 }
 
-function createJointState(name: XRHandJointName, source: Partial<XRPoseState> & { radius?: number }): XRHandJointState {
+function createJointState(
+  name: XRHandJointName,
+  source: Partial<XRPoseState> & { radius?: number }
+): XRHandJointState {
   const pose = createPoseState(source);
   return Object.freeze({
     ...pose,
@@ -109,11 +112,16 @@ function createJointState(name: XRHandJointName, source: Partial<XRPoseState> & 
   });
 }
 
-function resolveJointLookup(joints: readonly XRHandJointState[]): Readonly<Record<string, XRHandJointState>> {
+function resolveJointLookup(
+  joints: readonly XRHandJointState[]
+): Readonly<Record<string, XRHandJointState>> {
   return Object.freeze(Object.fromEntries(joints.map((joint) => [joint.joint, joint])));
 }
 
-function computePalmOrientation(joints: Readonly<Record<string, XRHandJointState>>, fallbackPose: XRPoseState): Quat {
+function computePalmOrientation(
+  joints: Readonly<Record<string, XRHandJointState>>,
+  fallbackPose: XRPoseState
+): Quat {
   const palmJoint = joints.palm;
   if (palmJoint) return palmJoint.rotation;
 
@@ -125,14 +133,20 @@ function computePalmOrientation(joints: Readonly<Record<string, XRHandJointState
   return Object.freeze({ x: forward.x, y: forward.y, z: forward.z, w: 0 });
 }
 
-function computeRayFallback(joints: Readonly<Record<string, XRHandJointState>>, fallbackPose: XRPoseState): {
+function computeRayFallback(
+  joints: Readonly<Record<string, XRHandJointState>>,
+  fallbackPose: XRPoseState
+): {
   readonly origin: Vec3;
   readonly direction: Vec3;
 } {
   const indexTip = joints['index-finger-tip'];
   const wrist = joints.wrist;
   if (!indexTip || !wrist) {
-    return Object.freeze({ origin: fallbackPose.position, direction: Object.freeze({ x: 0, y: 0, z: -1 }) });
+    return Object.freeze({
+      origin: fallbackPose.position,
+      direction: Object.freeze({ x: 0, y: 0, z: -1 }),
+    });
   }
 
   return Object.freeze({
@@ -156,7 +170,10 @@ function inferHandSignals(
     readonly palmOrientation?: Quat;
   },
   previousHand: XRHandState | null
-): Pick<XRHandState, 'pinchStrength' | 'pinching' | 'poking' | 'nearTargeting' | 'ray' | 'palmOrientation'> {
+): Pick<
+  XRHandState,
+  'pinchStrength' | 'pinching' | 'poking' | 'nearTargeting' | 'ray' | 'palmOrientation'
+> {
   const lookup = resolveJointLookup(handFrame.joints);
   const thumbTip = lookup['thumb-tip'];
   const indexTip = lookup['index-finger-tip'];
@@ -178,7 +195,8 @@ function inferHandSignals(
     poking = poking || extension >= POKE_EXTENSION_THRESHOLD;
   }
 
-  const palmOrientation = handFrame.palmOrientation ?? computePalmOrientation(lookup, handFrame.pose);
+  const palmOrientation =
+    handFrame.palmOrientation ?? computePalmOrientation(lookup, handFrame.pose);
   const ray = handFrame.ray ?? computeRayFallback(lookup, handFrame.pose);
 
   return {
