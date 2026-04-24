@@ -1,14 +1,15 @@
-export type {
-  XRSceneElement,
-  XREngineElement,
-  XRHudElement,
-  XRHandDebugElement,
-  XRDebugPanelElement,
-  XRCameraElement,
-  XREntityElement,
-  XRInputProfileViewerElement,
-  XRSceneInspectorElement,
-} from './web-component';
+export { registerUIWebComponents, defaultUIWebComponentTags } from './ui-webcomponents-runtime';
 
-// Placeholder for ui-webcomponents package
-export const placeholder = 'ui-webcomponents package initialized';
+export type {
+  RegisterUIWebComponentsOptions,
+  UIWebComponentTagNameMap,
+  XRCameraElement,
+  XRDebugPanelElement,
+  XREngineElement,
+  XREngineEvents,
+  XREntityElement,
+  XRHandDebugElement,
+  XRHudElement,
+  XRInputProfileViewerElement,
+  XRSceneElement,
+} from './web-component';
