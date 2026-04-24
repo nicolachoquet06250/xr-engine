@@ -277,7 +277,7 @@ describe('xr package - session and tracking lifecycle', () => {
       x: 0,
       y: 0.7071067811865478,
       z: -0.7071067811865474,
-      w: 0
+      w: 0,
     });
   });
 });
