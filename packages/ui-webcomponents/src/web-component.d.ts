@@ -1,4 +1,16 @@
-import type { UIAction, UIBridgeSnapshot } from '@xr-engine/ui-core';
+export interface UIAction<TPayload = unknown> {
+  readonly type: string;
+  readonly payload?: TPayload;
+}
+
+export interface UIBridgeSnapshot {
+  readonly route: string;
+  readonly focusedId: string | null;
+  readonly visiblePanelIds: readonly string[];
+  readonly enabledOverlayIds: readonly string[];
+  readonly menuOpen: boolean;
+  readonly debugEnabled: boolean;
+}
 
 export interface XREngineReadyEventDetail {
   readonly route: string;
@@ -22,17 +34,6 @@ export interface XREngineEvents {
 
 /**
  * Composant racine qui encapsule les services UI moteur.
- *
- * Props:
- * - route: route UI courante
- * - debug: active le mode debug UI
- * - menuOpen: ouvre/ferme le menu UI
- *
- * Méthodes publiques:
- * - getSnapshot()
- * - dispatchUIAction(action)
- * - attachRuntime(runtime)
- * - detachRuntime()
  */
 export interface XREngineElement extends HTMLElement {
   engine?: unknown;
@@ -42,35 +43,12 @@ export interface XREngineElement extends HTMLElement {
   detachRuntime(): void;
 }
 
-/** Composant de déclaration de scène UI. */
-export interface XRSceneElement extends HTMLElement {
-  setActive(active: boolean): void;
-}
-
-/** Composant de déclaration caméra UI. */
-export interface XRCameraElement extends HTMLElement {
-  setActive(active: boolean): void;
-}
-
-/** Composant de déclaration entité UI. */
-export interface XREntityElement extends HTMLElement {
-  setVisible(visible: boolean): void;
-  setSelected(selected: boolean): void;
-}
-
-/** Composant HUD UI. */
-export interface XRHudElement extends HTMLElement {
-  show(): void;
-  hide(): void;
-}
-
-/** Panneau debug UI. */
+export interface XRSceneElement extends HTMLElement {}
+export interface XRCameraElement extends HTMLElement {}
+export interface XREntityElement extends HTMLElement {}
+export interface XRHudElement extends HTMLElement {}
 export interface XRDebugPanelElement extends HTMLElement {}
-
-/** Overlay debug hand tracking. */
 export interface XRHandDebugElement extends HTMLElement {}
-
-/** Viewer de profil d'input normalisé. */
 export interface XRInputProfileViewerElement extends HTMLElement {}
 
 export interface UIWebComponentTagNameMap {

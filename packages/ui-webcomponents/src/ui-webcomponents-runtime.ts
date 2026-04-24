@@ -1,8 +1,9 @@
-import { createUICoreServices, type UIAction, type UIBridgeSnapshot } from '@xr-engine/ui-core';
 import { defineCustomElement, getCurrentInstance, h, onMounted, onUnmounted, watch } from 'vue';
 
 import type {
   RegisterUIWebComponentsOptions,
+  UIAction,
+  UIBridgeSnapshot,
   UIWebComponentTagNameMap,
   XREngineElement,
   XREngineEvents,
@@ -35,6 +36,17 @@ function currentHost<TElement extends HTMLElement>(): TElement | null {
   return (instance?.vnode.el as TElement | null) ?? null;
 }
 
+function createSnapshot(route: string, debugEnabled: boolean, menuOpen: boolean): UIBridgeSnapshot {
+  return Object.freeze({
+    route,
+    focusedId: null,
+    visiblePanelIds: Object.freeze([]),
+    enabledOverlayIds: Object.freeze([]),
+    menuOpen,
+    debugEnabled,
+  });
+}
+
 function defineEngineElement(tagName: string): void {
   const EngineElement = defineCustomElement({
     props: {
@@ -43,68 +55,74 @@ function defineEngineElement(tagName: string): void {
       menuOpen: { type: Boolean, default: false },
     },
     setup(props, { expose, slots }) {
-      const services = createUICoreServices({
-        initialRoute: props.route,
-        debugEnabled: props.debug,
-        menuOpen: props.menuOpen,
-      });
-
-      let detachRuntime: (() => void) | null = null;
       let host: XREngineElement | null = null;
+      let runtimeAttached = false;
+
+      const state = {
+        route: props.route,
+        debug: props.debug,
+        menuOpen: props.menuOpen,
+      };
 
       const publishSnapshot = (): void => {
         if (!host) return;
-        emit(host, 'xr-ui-snapshot', services.bridge.getSnapshot());
+        emit(host, 'xr-ui-snapshot', createSnapshot(state.route, state.debug, state.menuOpen));
       };
 
-      const unsubscribeBridge = services.bridge.subscribe(() => publishSnapshot());
+      const dispatchUIAction = (action: UIAction): void => {
+        if (action.type === 'ui.debug.enable') state.debug = true;
+        if (action.type === 'ui.debug.disable') state.debug = false;
+        if (action.type === 'ui.menu.open') state.menuOpen = true;
+        if (action.type === 'ui.menu.close') state.menuOpen = false;
+        if (action.type === 'ui.route.set' && typeof action.payload === 'string') state.route = action.payload;
+        publishSnapshot();
+      };
 
       onMounted(() => {
         host = currentHost<XREngineElement>();
         if (!host) return;
 
         emit(host, 'xr-engine-ready', {
-          route: services.navigation.getRoute().current,
-          debugEnabled: services.store.getState().debug.enabled,
+          route: state.route,
+          debugEnabled: state.debug,
         });
         publishSnapshot();
       });
 
       onUnmounted(() => {
-        unsubscribeBridge();
-        detachRuntime?.();
         if (!host) return;
-
-        emit(host, 'xr-engine-destroyed', {
-          route: services.navigation.getRoute().current,
-        });
+        emit(host, 'xr-engine-destroyed', { route: state.route });
       });
 
-      watch(() => props.route, (route) => services.navigation.setRoute(route));
-      watch(() => props.debug, (enabled) =>
-        services.actions.dispatch({ type: enabled ? 'ui.debug.enable' : 'ui.debug.disable' })
-      );
-      watch(() => props.menuOpen, (open) =>
-        services.actions.dispatch({ type: open ? 'ui.menu.open' : 'ui.menu.close' })
-      );
+      watch(() => props.route, (route) => {
+        state.route = route;
+        publishSnapshot();
+      });
+
+      watch(() => props.debug, (enabled) => {
+        state.debug = enabled;
+        publishSnapshot();
+      });
+
+      watch(() => props.menuOpen, (open) => {
+        state.menuOpen = open;
+        publishSnapshot();
+      });
 
       expose({
-        getSnapshot: (): UIBridgeSnapshot => services.bridge.getSnapshot(),
-        dispatchUIAction: (action: UIAction): void => services.actions.dispatch(action),
+        getSnapshot: (): UIBridgeSnapshot => createSnapshot(state.route, state.debug, state.menuOpen),
+        dispatchUIAction,
         attachRuntime: (runtime: unknown): void => {
           if (!host) return;
           host.engine = runtime;
-          emit(host, 'xr-runtime-attached', { runtimeAttached: true });
-
-          detachRuntime = () => {
-            if (!host) return;
-            host.engine = undefined;
-            emit(host, 'xr-runtime-attached', { runtimeAttached: false });
-          };
+          runtimeAttached = true;
+          emit(host, 'xr-runtime-attached', { runtimeAttached });
         },
         detachRuntime: (): void => {
-          detachRuntime?.();
-          detachRuntime = null;
+          if (!host || !runtimeAttached) return;
+          host.engine = undefined;
+          runtimeAttached = false;
+          emit(host, 'xr-runtime-attached', { runtimeAttached });
         },
       });
 
@@ -178,14 +196,6 @@ export function registerUIWebComponents(options: RegisterUIWebComponentsOptions 
         props: { sceneId: { type: String, default: 'default' }, active: { type: Boolean, default: true } },
         mountedEvent: 'xr-scene-mounted',
         unmountedEvent: 'xr-scene-unmounted',
-        methods: (getHost: () => HTMLElement | null) => ({
-          setActive(active: boolean): void {
-            const host = getHost();
-            if (!host) return;
-            host.toggleAttribute('active', active);
-            emit(host, 'xr-scene-activity-changed', { active });
-          },
-        }),
       },
     },
     {
@@ -200,14 +210,6 @@ export function registerUIWebComponents(options: RegisterUIWebComponentsOptions 
         },
         mountedEvent: 'xr-camera-mounted',
         unmountedEvent: 'xr-camera-unmounted',
-        methods: (getHost: () => HTMLElement | null) => ({
-          setActive(active: boolean): void {
-            const host = getHost();
-            if (!host) return;
-            host.toggleAttribute('active', active);
-            emit(host, 'xr-camera-activity-changed', { active });
-          },
-        }),
       },
     },
     {
@@ -221,20 +223,6 @@ export function registerUIWebComponents(options: RegisterUIWebComponentsOptions 
         },
         mountedEvent: 'xr-entity-mounted',
         unmountedEvent: 'xr-entity-unmounted',
-        methods: (getHost: () => HTMLElement | null) => ({
-          setVisible(visible: boolean): void {
-            const host = getHost();
-            if (!host) return;
-            host.toggleAttribute('visible', visible);
-            emit(host, 'xr-entity-visibility-changed', { visible });
-          },
-          setSelected(selected: boolean): void {
-            const host = getHost();
-            if (!host) return;
-            host.toggleAttribute('selected', selected);
-            emit(host, 'xr-entity-selection-changed', { selected });
-          },
-        }),
       },
     },
     {
@@ -247,20 +235,6 @@ export function registerUIWebComponents(options: RegisterUIWebComponentsOptions 
         },
         mountedEvent: 'xr-hud-mounted',
         unmountedEvent: 'xr-hud-unmounted',
-        methods: (getHost: () => HTMLElement | null) => ({
-          show(): void {
-            const host = getHost();
-            if (!host) return;
-            host.toggleAttribute('visible', true);
-            emit(host, 'xr-hud-visibility-changed', { visible: true });
-          },
-          hide(): void {
-            const host = getHost();
-            if (!host) return;
-            host.toggleAttribute('visible', false);
-            emit(host, 'xr-hud-visibility-changed', { visible: false });
-          },
-        }),
       },
     },
     {
