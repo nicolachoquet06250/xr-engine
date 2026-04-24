@@ -1,5 +1,3 @@
-import type { Vec3 } from '@xr-engine/math';
-
 import type {
   ControllerInteractionInput,
   HandInteractionInput,
@@ -13,6 +11,8 @@ import type {
   InteractorKind,
   ResolvedInteraction,
 } from './interaction';
+
+import type { Vec3 } from '@xr-engine/math';
 
 const DEFAULT_NEAR_DISTANCE = 0.2;
 const DEFAULT_GRAB_DISTANCE = 0.12;
@@ -124,7 +124,9 @@ class InteractionSystemImpl implements InteractionSystem {
       const grabRequested = intents.some((intent) => intent.name === 'grab' && intent.active);
       const releaseRequested = intents.some((intent) => intent.name === 'release' && intent.active);
       const useRequested = intents.some((intent) => intent.name === 'use' && intent.active);
-      const teleportRequested = intents.some((intent) => intent.name === 'teleport' && intent.active);
+      const teleportRequested = intents.some(
+        (intent) => intent.name === 'teleport' && intent.active
+      );
       const uiPressRequested = intents.some((intent) => intent.name === 'uiPress' && intent.active);
 
       if (selectRequested && nextTarget) {
@@ -235,7 +237,9 @@ export function createHandInteractor(id: string, input: HandInteractionInput): I
   });
 }
 
-export function deriveInteractionIntents(interactor: Interactor): readonly InteractionIntentState[] {
+export function deriveInteractionIntents(
+  interactor: Interactor
+): readonly InteractionIntentState[] {
   return Object.freeze([
     Object.freeze({ name: 'select', active: interactor.selectPressed }),
     Object.freeze({ name: 'grab', active: interactor.grabPressed }),
@@ -263,7 +267,9 @@ export function resolveByDistance(
   for (const candidate of candidates) {
     const candidateDistance =
       candidate.distance ??
-      (candidate.point && interactor.position ? distance(interactor.position, candidate.point) : Infinity);
+      (candidate.point && interactor.position
+        ? distance(interactor.position, candidate.point)
+        : Infinity);
 
     if (candidateDistance > maxDistance) continue;
     if (!best || candidateDistance < (best.distance ?? Infinity)) {

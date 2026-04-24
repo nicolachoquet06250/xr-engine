@@ -105,7 +105,9 @@ export interface InteractionSystem {
   getResolvedInteractions(): readonly ResolvedInteraction[];
 }
 
-export declare function createInteractionSystem(options?: InteractionSystemOptions): InteractionSystem;
+export declare function createInteractionSystem(
+  options?: InteractionSystemOptions
+): InteractionSystem;
 export declare function createControllerInteractor(
   id: string,
   input: ControllerInteractionInput

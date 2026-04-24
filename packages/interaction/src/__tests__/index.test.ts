@@ -176,12 +176,6 @@ describe('interaction package - gameplay rule must stay device-agnostic', () => 
     system.registerInteractor(releaseInteractor);
     system.update(deriveInteractionIntents(releaseInteractor));
 
-    expect(events).toEqual([
-      'hover-enter',
-      'select-start',
-      'grab-start',
-      'select-end',
-      'grab-end',
-    ]);
+    expect(events).toEqual(['hover-enter', 'select-start', 'grab-start', 'select-end', 'grab-end']);
   });
 });

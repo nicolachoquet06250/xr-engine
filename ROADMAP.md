@@ -969,9 +969,9 @@ Prévoir :
 
 ---
 
-## 15. Construire la couche interaction → On en est là
+## 15. Construire la couche interaction ✅
 
-### 15.1 Types d’interaction
+### 15.1 Types d’interaction ✅
 
 - far interaction
 - near interaction
@@ -979,26 +979,26 @@ Prévoir :
 - UI interaction
 - locomotion interaction
 
-### 15.2 Contrôleurs XR
+### 15.2 Contrôleurs XR ✅
 
 - ray pointer
 - grip grab
 - trigger use
 
-### 15.3 Hand tracking
+### 15.3 Hand tracking ✅
 
 - pinch select
 - poke UI
 - near grab
 - ray fallback si nécessaire
 
-### 15.4 Règle de gameplay
+### 15.4 Règle de gameplay ✅
 
 Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ---
 
-## 16. Construire la couche audio
+## 16. Construire la couche audio → On en est là
 
 ### 16.1 MVP audio
 
