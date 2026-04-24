@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { vec3 } from '../../../math/src/math-runtime';
+import { vec3 } from '@xr-engine/math';
 import { createScene } from '../../../scene/src/scene-runtime';
 
 import { createPhysicsWorld } from '../index';
