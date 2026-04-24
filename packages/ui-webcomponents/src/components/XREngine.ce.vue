@@ -1,7 +1,5 @@
 <template>
-  <section part="root" data-component="xr-engine">
-    <slot />
-  </section>
+  <slot />
 </template>
 
 <script setup lang="ts">

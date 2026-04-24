@@ -1,5 +1,5 @@
 <template>
-  <section part="root" data-component="xr-hand-debug"><slot /></section>
+  <slot />
 </template>
 
 <script setup lang="ts">

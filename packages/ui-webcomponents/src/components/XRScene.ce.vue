@@ -1,5 +1,5 @@
 <template>
-  <section part="root" data-component="xr-scene"><slot /></section>
+  <slot />
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <section part="root" data-component="xr-hud"><slot /></section>
+  <slot />
 </template>
 
 <script setup lang="ts">

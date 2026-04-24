@@ -1,5 +1,5 @@
 <template>
-  <section part="root" data-component="xr-input-profile-viewer"><slot /></section>
+  <slot />
 </template>
 
 <script setup lang="ts">
