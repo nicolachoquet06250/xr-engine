@@ -1,15 +1,27 @@
 export type {
-  GameMode,
+  CreateGameplayServicesOptions,
   GameEvent,
-  GameRule,
-  GameState,
-  InteractionRule,
-  GameplaySystem,
+  GameObjectBlueprint,
+  GameObjectDefinition,
+  GameplayComposer,
   GameplayContext,
+  GameplayInteraction,
+  GameplayInteractionRegistry,
+  GameplayPublicApis,
+  GameplayServices,
+  GameState,
+  GameStateMachine,
+  GameStateSnapshot,
   ScriptBehaviour,
+  ScriptRunner,
+  SelectionCandidate,
+  SelectionContext,
+  SelectionDecision,
+  SelectionRule,
+  SelectionService,
+  SpawnFactory,
   SpawnRequest,
   SpawnService,
 } from './gameplay';
 
-// Placeholder for gameplay package
-export const placeholder = 'gameplay package initialized';
+export { createGameplayServices } from './gameplay-runtime';
