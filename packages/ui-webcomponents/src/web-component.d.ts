@@ -91,7 +91,11 @@ export interface XRDebugPanelElement extends HTMLElement {
 
 export interface XRHandDebugElement extends HTMLElement {
   setVisibilityFlags(next: { showJoints?: boolean; showPinch?: boolean; showPoke?: boolean }): void;
-  updateTracking(next: { trackingValid: boolean; pinchStrength: number; pokeDistance: number }): void;
+  updateTracking(next: {
+    trackingValid: boolean;
+    pinchStrength: number;
+    pokeDistance: number;
+  }): void;
   getState(): {
     hand: 'left' | 'right';
     showJoints: boolean;

@@ -3,21 +3,25 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch, toRefs } from 'vue';
+import { onMounted, onUnmounted, watch, toRefs, withDefaults } from 'vue';
 
-const {entityId, active, fov, near, far} = toRefs(withDefaults(defineProps<{
-  entityId?: string;
-  active?: boolean;
-  fov?: number;
-  near?: number;
-  far?: number;
-}>(), {
-  entityId: '',
-  active: true,
-  fov: 60,
-  near: 0.1,
-  far: 1000,
-}));
+const props = withDefaults(
+  defineProps<{
+    entityId?: string;
+    active?: boolean;
+    fov?: number;
+    near?: number;
+    far?: number;
+  }>(),
+  {
+    entityId: '',
+    active: true,
+    fov: 60,
+    near: 0.1,
+    far: 1000,
+  }
+);
+const { entityId, active, fov, near, far } = toRefs(props);
 
 const emit = defineEmits<{
   (event: 'xr-camera-mounted', detail: { entityId: string; active: boolean }): void;
@@ -56,10 +60,8 @@ function getState(): { entityId: string; active: boolean; fov: number; near: num
 
 watch(entityId, (value) => bindToEntity(value));
 watch(active, (value) => setActive(value));
-watch(
-  [fov, near, far] as const,
-  ([nextFov, nextNear, nextFar]) =>
-    setProjection(nextFov ?? 60, nextNear ?? 0.1, nextFar ?? 1000)
+watch([fov, near, far] as const, ([nextFov, nextNear, nextFar]) =>
+  setProjection(nextFov ?? 60, nextNear ?? 0.1, nextFar ?? 1000)
 );
 
 onMounted(() => {

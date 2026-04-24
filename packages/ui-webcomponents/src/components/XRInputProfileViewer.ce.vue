@@ -3,24 +3,34 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, toRefs, watch} from 'vue';
+import { onMounted, onUnmounted, toRefs, watch, withDefaults } from 'vue';
 
-const {profileId, deviceKind, layout, activeControl} = toRefs(withDefaults(defineProps<{
-  profileId?: string;
-  deviceKind?: string;
-  layout?: 'grid' | 'list';
-  activeControl?: string|null;
-}>(), {
-  profileId: '',
-  deviceKind: 'unknown',
-  layout: 'grid',
-  activeControl: null
-}));
+const props = withDefaults(
+  defineProps<{
+    profileId?: string;
+    deviceKind?: string;
+    layout?: 'grid' | 'list';
+    activeControl?: string | null;
+  }>(),
+  {
+    profileId: '',
+    deviceKind: 'unknown',
+    layout: 'grid',
+    activeControl: null,
+  }
+);
+const { profileId, deviceKind, layout, activeControl } = toRefs(props);
 
 const emit = defineEmits<{
-  (event: 'xr-input-profile-viewer-mounted', detail: { profileId: string; deviceKind: string }): void;
+  (
+    event: 'xr-input-profile-viewer-mounted',
+    detail: { profileId: string; deviceKind: string }
+  ): void;
   (event: 'xr-input-profile-viewer-unmounted', detail: { profileId: string }): void;
-  (event: 'xr-input-profile-viewer-profile-changed', detail: { profileId: string; deviceKind: string }): void;
+  (
+    event: 'xr-input-profile-viewer-profile-changed',
+    detail: { profileId: string; deviceKind: string }
+  ): void;
   (event: 'xr-input-profile-viewer-layout-changed', detail: { layout: 'grid' | 'list' }): void;
   (event: 'xr-input-profile-viewer-control-focused', detail: { controlId: string | null }): void;
 }>();

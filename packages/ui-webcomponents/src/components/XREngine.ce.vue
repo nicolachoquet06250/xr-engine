@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, onMounted, onUnmounted, ref, toRefs, watch} from 'vue';
+import { getCurrentInstance, onMounted, onUnmounted, ref, watch, withDefaults } from 'vue';
 
 import type {
   UIAction,
@@ -14,15 +14,21 @@ import type {
   XRRuntimeAttachedEventDetail,
 } from '../web-component';
 
-const {route, debug, menuOpen} = toRefs(withDefaults(defineProps<{
-  route?: string;
-  debug?: boolean;
-  menuOpen?: boolean;
-}>(), {
-  route: '/',
-  debug: false,
-  menuOpen: false,
-}));
+const props = withDefaults(
+  defineProps<{
+    route?: string;
+    debug?: boolean;
+    menuOpen?: boolean;
+  }>(),
+  {
+    route: '/',
+    debug: false,
+    menuOpen: false,
+  }
+);
+const route = ref(props.route);
+const debugEnabled = ref(props.debug);
+const menuOpen = ref(props.menuOpen);
 
 const emit = defineEmits<{
   (event: 'xr-engine-ready', detail: XREngineReadyEventDetail): void;
@@ -39,12 +45,12 @@ function getHost(): XREngineElement | null {
 
 function createSnapshot(): UIBridgeSnapshot {
   return Object.freeze({
-    route: route.value,
+    route: route.value ?? '/',
     focusedId: null,
     visiblePanelIds: Object.freeze([]),
     enabledOverlayIds: Object.freeze([]),
-    menuOpen: menuOpen.value,
-    debugEnabled: debug.value,
+    menuOpen: menuOpen.value ?? false,
+    debugEnabled: debugEnabled.value ?? false,
   });
 }
 
@@ -53,11 +59,12 @@ function publishSnapshot(): void {
 }
 
 function dispatchUIAction(action: UIAction): void {
-  if (action.type === 'ui.debug.enable') debug.value = true;
-  if (action.type === 'ui.debug.disable') debug.value = false;
+  if (action.type === 'ui.debug.enable') debugEnabled.value = true;
+  if (action.type === 'ui.debug.disable') debugEnabled.value = false;
   if (action.type === 'ui.menu.open') menuOpen.value = true;
   if (action.type === 'ui.menu.close') menuOpen.value = false;
-  if (action.type === 'ui.route.set' && typeof action.payload === 'string') route.value = action.payload;
+  if (action.type === 'ui.route.set' && typeof action.payload === 'string')
+    route.value = action.payload;
   publishSnapshot();
 }
 
@@ -83,25 +90,34 @@ function getSnapshot(): UIBridgeSnapshot {
   return createSnapshot();
 }
 
-watch(route, (value) => {
-  route.value = value ?? '/';
-  publishSnapshot();
-});
+watch(
+  () => props.route,
+  (value) => {
+    route.value = value ?? '/';
+    publishSnapshot();
+  }
+);
 
-watch(debug, (value) => {
-  debug.value = value ?? false;
-  publishSnapshot();
-});
+watch(
+  () => props.debug,
+  (value) => {
+    debugEnabled.value = value ?? false;
+    publishSnapshot();
+  }
+);
 
-watch(menuOpen, (value) => {
-  menuOpen.value = value ?? false;
-  publishSnapshot();
-});
+watch(
+  () => props.menuOpen,
+  (value) => {
+    menuOpen.value = value ?? false;
+    publishSnapshot();
+  }
+);
 
 onMounted(() => {
   emit('xr-engine-ready', {
-    route: route.value,
-    debugEnabled: debug.value,
+    route: route.value ?? '/',
+    debugEnabled: debugEnabled.value ?? false,
   });
   publishSnapshot();
 });

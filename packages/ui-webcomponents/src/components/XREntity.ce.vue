@@ -3,21 +3,25 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, toRefs, watch} from 'vue';
+import { onMounted, onUnmounted, toRefs, watch, withDefaults } from 'vue';
 
-const {entityId, parentId, visible, selected, enabled} = toRefs(withDefaults(defineProps<{
-  entityId?: string;
-  parentId?: string|null;
-  visible?: boolean;
-  selected?: boolean;
-  enabled?: boolean;
-}>(), {
-  entityId: '',
-  parentId: null,
-  visible: true,
-  selected: false,
-  enabled: true,
-}));
+const props = withDefaults(
+  defineProps<{
+    entityId?: string;
+    parentId?: string | null;
+    visible?: boolean;
+    selected?: boolean;
+    enabled?: boolean;
+  }>(),
+  {
+    entityId: '',
+    parentId: null,
+    visible: true,
+    selected: false,
+    enabled: true,
+  }
+);
+const { entityId, parentId, visible, selected, enabled } = toRefs(props);
 
 const emit = defineEmits<{
   (event: 'xr-entity-mounted', detail: { entityId: string; parentId: string | null }): void;
@@ -64,7 +68,7 @@ function getState(): {
   };
 }
 
-watch(entityId, (value) => entityId.value = value);
+watch(entityId, (value) => (entityId.value = value));
 watch(parentId, (value) => setParent(value ?? null));
 watch(visible, (value) => setVisible(value));
 watch(selected, (value) => setSelected(value));

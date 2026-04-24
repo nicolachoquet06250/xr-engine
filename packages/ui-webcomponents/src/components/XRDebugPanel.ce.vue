@@ -3,17 +3,21 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, toRefs, watch} from 'vue';
+import { onMounted, onUnmounted, toRefs, watch, withDefaults } from 'vue';
 
-const {open, metricsTarget, refreshRate} = toRefs(withDefaults(defineProps<{
-  open?: boolean;
-  metricsTarget?: string;
-  refreshRate?: number;
-}>(), {
-  open: false,
-  metricsTarget: 'runtime',
-  refreshRate: 15,
-}));
+const props = withDefaults(
+  defineProps<{
+    open?: boolean;
+    metricsTarget?: string;
+    refreshRate?: number;
+  }>(),
+  {
+    open: false,
+    metricsTarget: 'runtime',
+    refreshRate: 15,
+  }
+);
+const { open, metricsTarget, refreshRate } = toRefs(props);
 
 const emit = defineEmits<{
   (event: 'xr-debug-panel-mounted', detail: { open: boolean; metricsTarget: string }): void;
@@ -51,9 +55,9 @@ function getState(): { open: boolean; metricsTarget: string; refreshRate: number
   };
 }
 
-watch(open, (value) => value ? openPanel() : closePanel());
+watch(open, (value) => (value ? openPanel() : closePanel()));
 watch(metricsTarget, (value) => setMetricsTarget(value));
-watch(refreshRate, (value) => refreshRate.value = value);
+watch(refreshRate, (value) => (refreshRate.value = value));
 
 onMounted(() => {
   emit('xr-debug-panel-mounted', {

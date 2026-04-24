@@ -35,14 +35,18 @@ describe('ui-webcomponents', () => {
     document.body.append(element);
 
     const readyEvent = await ready;
-    expect(readyEvent.detail.route).toBe('/');
-    expect(typeof readyEvent.detail.debugEnabled).toBe('boolean');
+    expect(readyEvent.detail[0].route).toBe('/');
+    expect(typeof readyEvent.detail[0].debugEnabled).toBe('boolean');
 
-    (element as unknown as { dispatchUIAction: (action: { type: string }) => void }).dispatchUIAction({
+    (
+      element as unknown as { dispatchUIAction: (action: { type: string }) => void }
+    ).dispatchUIAction({
       type: 'ui.debug.enable',
     });
 
-    const currentSnapshot = (element as unknown as { getSnapshot: () => { debugEnabled: boolean } }).getSnapshot();
+    const currentSnapshot = (
+      element as unknown as { getSnapshot: () => { debugEnabled: boolean } }
+    ).getSnapshot();
     expect(currentSnapshot.debugEnabled).toBe(true);
     expect(snapshots.length).toBeGreaterThan(0);
 
@@ -63,8 +67,8 @@ describe('ui-webcomponents', () => {
       getState: () => { visible: boolean };
     };
 
-    document.body.append(scene);
-    document.body.append(hud);
+    document.body.append(scene as unknown as Node);
+    document.body.append(hud as unknown as Node);
 
     scene.setActive(false);
     scene.setLoaded(true);

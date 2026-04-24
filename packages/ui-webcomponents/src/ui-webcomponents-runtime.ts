@@ -8,6 +8,7 @@ import XRHandDebug from './components/XRHandDebug.ce.vue';
 import XRInputProfileViewer from './components/XRInputProfileViewer.ce.vue';
 
 import type { RegisterUIWebComponentsOptions, UIWebComponentTagNameMap } from './web-component';
+import { type Component, defineCustomElement, type SetupContext } from 'vue';
 
 const defaultTags = Object.freeze({
   engine: 'xr-engine',
@@ -33,12 +34,14 @@ const componentConstructors = {
   inputProfileViewer: XRInputProfileViewer,
 } as const;
 
-function defineComponent(tagName: string, constructor: unknown): void {
-  if (registeredTags.has(tagName)) {
+function defineComponent(tagName: string, component: Component): void {
+  if (registeredTags.has(tagName) || customElements.get(tagName)) {
     return;
   }
 
-  customElements.define(tagName, constructor as CustomElementConstructor);
+  const constructor = defineCustomElement(component as (props: any, ctx: SetupContext) => any);
+
+  customElements.define(tagName, constructor);
   registeredTags.add(tagName);
 }
 

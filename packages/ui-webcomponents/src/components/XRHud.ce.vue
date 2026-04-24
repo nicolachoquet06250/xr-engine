@@ -3,19 +3,26 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, toRefs, watch} from 'vue';
+import { onMounted, onUnmounted, ref, watch, withDefaults } from 'vue';
 
-const {panelId, overlayId, visible, anchor} = toRefs(withDefaults(defineProps<{
-  panelId?: string;
-  overlayId?: string;
-  visible?: boolean;
-  anchor?: 'screen' | 'world';
-}>(), {
-  panelId: 'hud-main',
-  overlayId: 'hud-overlay',
-  visible: true,
-  anchor: 'screen'
-}));
+const props = withDefaults(
+  defineProps<{
+    panelId?: string;
+    overlayId?: string;
+    visible?: boolean;
+    anchor?: 'screen' | 'world';
+  }>(),
+  {
+    panelId: 'hud-main',
+    overlayId: 'hud-overlay',
+    visible: true,
+    anchor: 'screen',
+  }
+);
+const panelId = ref(props.panelId);
+const overlayId = ref(props.overlayId);
+const visible = ref(props.visible);
+const anchor = ref(props.anchor);
 
 const emit = defineEmits<{
   (event: 'xr-hud-mounted', detail: { panelId: string; overlayId: string; visible: boolean }): void;
@@ -45,7 +52,12 @@ function setAnchor(nextAnchor: 'screen' | 'world'): void {
   emit('xr-hud-anchor-changed', { panelId: panelId.value, anchor: nextAnchor });
 }
 
-function getState(): { panelId: string; overlayId: string; visible: boolean; anchor: 'screen' | 'world' } {
+function getState(): {
+  panelId: string;
+  overlayId: string;
+  visible: boolean;
+  anchor: 'screen' | 'world';
+} {
   return {
     panelId: panelId.value,
     overlayId: overlayId.value,
@@ -54,10 +66,37 @@ function getState(): { panelId: string; overlayId: string; visible: boolean; anc
   };
 }
 
-watch(panelId, (value) => panelId.value = value);
-watch(overlayId, (value) => overlayId.value = value);
-watch(visible, (value) => value ? show() : hide());
-watch(anchor, (value) => value && setAnchor(value));
+watch(
+  () => props.panelId,
+  (value) => {
+    if (!value) return;
+    panelId.value = value;
+  }
+);
+
+watch(
+  () => props.overlayId,
+  (value) => {
+    if (!value) return;
+    overlayId.value = value;
+  }
+);
+
+watch(
+  () => props.visible,
+  (value) => {
+    if (value === undefined || value === visible.value) return;
+    value ? show() : hide();
+  }
+);
+
+watch(
+  () => props.anchor,
+  (value) => {
+    if (!value || value === anchor.value) return;
+    setAnchor(value);
+  }
+);
 
 onMounted(() => {
   emit('xr-hud-mounted', {

@@ -3,35 +3,45 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref, toRefs, watch} from 'vue';
+import { onMounted, onUnmounted, ref, toRefs, watch, withDefaults } from 'vue';
 
-const {hand, showJoints, showPinch, showPoke} = toRefs(withDefaults(defineProps<{
-  hand?: 'left' | 'right';
-  showJoints?: boolean;
-  showPinch?: boolean;
-  showPoke?: boolean;
-}>(), {
-  hand: 'left',
-  showJoints: true,
-  showPinch: true,
-  showPoke: true,
-}));
+const props = withDefaults(
+  defineProps<{
+    hand?: 'left' | 'right';
+    showJoints?: boolean;
+    showPinch?: boolean;
+    showPoke?: boolean;
+  }>(),
+  {
+    hand: 'left',
+    showJoints: true,
+    showPinch: true,
+    showPoke: true,
+  }
+);
+const { hand, showJoints, showPinch, showPoke } = toRefs(props);
 
 const emit = defineEmits<{
   (event: 'xr-hand-debug-mounted', detail: { hand: 'left' | 'right' }): void;
   (event: 'xr-hand-debug-unmounted', detail: { hand: 'left' | 'right' }): void;
-  (event: 'xr-hand-debug-visibility-changed', detail: {
-    hand: 'left' | 'right';
-    showJoints: boolean;
-    showPinch: boolean;
-    showPoke: boolean;
-  }): void;
-  (event: 'xr-hand-debug-tracking-updated', detail: {
-    hand: 'left' | 'right';
-    trackingValid: boolean;
-    pinchStrength: number;
-    pokeDistance: number;
-  }): void;
+  (
+    event: 'xr-hand-debug-visibility-changed',
+    detail: {
+      hand: 'left' | 'right';
+      showJoints: boolean;
+      showPinch: boolean;
+      showPoke: boolean;
+    }
+  ): void;
+  (
+    event: 'xr-hand-debug-tracking-updated',
+    detail: {
+      hand: 'left' | 'right';
+      trackingValid: boolean;
+      pinchStrength: number;
+      pokeDistance: number;
+    }
+  ): void;
 }>();
 
 const trackingValid = ref(false);
@@ -93,14 +103,12 @@ function getState(): {
 }
 
 watch(hand, (value) => value && (hand.value = value));
-watch(
-  [showJoints, showPinch, showPoke] as const,
-  ([nextShowJoints, nextShowPinch, nextShowPoke]) =>
-    setVisibilityFlags({
-      showJoints: nextShowJoints,
-      showPinch: nextShowPinch,
-      showPoke: nextShowPoke,
-    })
+watch([showJoints, showPinch, showPoke] as const, ([nextShowJoints, nextShowPinch, nextShowPoke]) =>
+  setVisibilityFlags({
+    showJoints: nextShowJoints,
+    showPinch: nextShowPinch,
+    showPoke: nextShowPoke,
+  })
 );
 
 onMounted(() => emit('xr-hand-debug-mounted', { hand: hand.value }));
