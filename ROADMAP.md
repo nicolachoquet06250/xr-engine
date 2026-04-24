@@ -932,16 +932,16 @@ Raw device state
 
 ---
 
-## 14. Construire la couche XR → On en est là
+## 14. Construire la couche XR ✅
 
-### 14.1 Gestion de session
+### 14.1 Gestion de session ✅
 
 - détection support
 - entrée/sortie session
 - reference spaces
 - frame loop XR
 
-### 14.2 Tracking state
+### 14.2 Tracking state ✅
 
 - head pose
 - controller states
@@ -949,7 +949,7 @@ Raw device state
 - validité tracking
 - changements de mode
 
-### 14.3 Support hand tracking
+### 14.3 Support hand tracking ✅
 
 - joints runtime
 - pinch
@@ -958,7 +958,7 @@ Raw device state
 - near targeting
 - ray fallback
 
-### 14.4 Bascule entre modes
+### 14.4 Bascule entre modes ✅
 
 Prévoir :
 
@@ -969,7 +969,7 @@ Prévoir :
 
 ---
 
-## 15. Construire la couche interaction
+## 15. Construire la couche interaction → On en est là
 
 ### 15.1 Types d’interaction
 
