@@ -1,13 +1,26 @@
-export type {
-  UIStateStore,
-  UIPanelState,
-  UIEventBus,
-  UIActionDispatcher,
-  UIFocusManager,
-  UINodeModel,
-  UIOverlayState,
-  UIRouteState,
-} from './ui-core';
+export { createUICoreServices } from './ui-core-runtime';
 
-// Placeholder for ui-core package
-export const placeholder = 'ui-core package initialized';
+export type {
+  UIAction,
+  UIActionDispatcher,
+  UIActionType,
+  UIBridgeSnapshot,
+  UICoreServices,
+  UIDebugState,
+  UIEvent,
+  UIEventBus,
+  UIFocusManager,
+  UIMenuState,
+  UINavigator,
+  UIOverlayController,
+  UIOverlayEntry,
+  UIPanelKind,
+  UIPanelModel,
+  UIPanelRegistry,
+  UIRouteState,
+  UIRuntimeBridge,
+  UIState,
+  UIStateStore,
+  UIStateUpdater,
+  CreateUICoreServicesOptions,
+} from './ui-core';
