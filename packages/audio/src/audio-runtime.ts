@@ -1,4 +1,3 @@
-import type { Vec3 } from '@xr-engine/math';
 import type {
   AudioBus,
   AudioClip,
@@ -13,6 +12,7 @@ import type {
   CreateAudioSystemOptions,
   SpatialAudioConfig,
 } from './audio';
+import type { Vec3 } from '@xr-engine/math';
 
 const DEFAULT_POSITION: Vec3 = Object.freeze({ x: 0, y: 0, z: 0 });
 const DEFAULT_MAX_DISTANCE = 25;
