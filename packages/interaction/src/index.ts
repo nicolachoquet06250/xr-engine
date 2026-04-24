@@ -1,16 +1,23 @@
-export type {
-  InteractionEvent,
-  InteractionMode,
-  Interactable,
-  InteractionTarget,
-  GrabInteractor,
-  PinchInteractor,
-  Interactor,
-  RayInteractor,
-  PokeInteractor,
-  TeleportInteractor,
-  UIInteractor,
-} from './interaction';
+export {
+  createInteractionSystem,
+  createControllerInteractor,
+  createHandInteractor,
+  deriveInteractionIntents,
+  resolveByDistance,
+} from './interaction-runtime';
 
-// Placeholder for interaction package
-export const placeholder = 'interaction package initialized';
+export type {
+  ControllerInteractionInput,
+  HandInteractionInput,
+  InteractionEvent,
+  InteractionIntentName,
+  InteractionIntentState,
+  InteractionMode,
+  InteractionResolution,
+  InteractionSystem,
+  InteractionSystemOptions,
+  Interactable,
+  Interactor,
+  InteractorKind,
+  ResolvedInteraction,
+} from './interaction';
