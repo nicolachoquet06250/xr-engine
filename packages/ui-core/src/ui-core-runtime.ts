@@ -179,7 +179,8 @@ class UIFocusManagerImpl implements UIFocusManager {
     }
 
     const index = this.navigables.indexOf(this.focusedId);
-    const previousIndex = index >= 0 ? (index - 1 + this.navigables.length) % this.navigables.length : 0;
+    const previousIndex =
+      index >= 0 ? (index - 1 + this.navigables.length) % this.navigables.length : 0;
     return this.focus(this.navigables[previousIndex]);
   }
 
@@ -424,7 +425,9 @@ class UIRuntimeBridgeImpl implements UIRuntimeBridge {
 }
 
 export function createUICoreServices(options: CreateUICoreServicesOptions = {}): UICoreServices {
-  const initialPanels = Object.freeze([...(options.initialPanels ?? [])].map((panel) => freeze({ ...panel })));
+  const initialPanels = Object.freeze(
+    [...(options.initialPanels ?? [])].map((panel) => freeze({ ...panel }))
+  );
   const initialOverlays = Object.freeze(
     [...(options.initialOverlays ?? [])].map((overlay) => freeze({ ...overlay }))
   );
