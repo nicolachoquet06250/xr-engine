@@ -1078,13 +1078,13 @@ La couche gameplay sert à écrire la logique métier sans dépendre des détail
 
 ---
 
-## 19. Construire la couche UI Core → On en est là
+## 19. Construire la couche UI Core ✅
 
-### 19.1 Objectif
+### 19.1 Objectif ✅
 
 Créer une base UI indépendante du framework d’affichage final.
 
-### 19.2 Contenu
+### 19.2 Contenu ✅
 
 - état UI
 - focus
@@ -1093,7 +1093,7 @@ Créer une base UI indépendante du framework d’affichage final.
 - modèles de panneaux
 - état overlays/debug/menu
 
-### 19.3 Rôle
+### 19.3 Rôle ✅
 
 Cette couche sert de pont entre :
 
@@ -1102,7 +1102,7 @@ Cette couche sert de pont entre :
 
 ---
 
-## 20. Construire la couche UI WebComponents
+## 20. Construire la couche UI WebComponents → On en est là
 
 ### 20.1 Objectif
 
