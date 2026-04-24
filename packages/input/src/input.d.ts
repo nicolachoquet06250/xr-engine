@@ -16,14 +16,46 @@ export interface InputPose {
   readonly rotation: Quat;
 }
 
-export type InputSignal = boolean | number | InputVector2 | InputPose | null;
+export interface InputRay {
+  readonly origin: Vec3;
+  readonly direction: Vec3;
+}
 
-export interface InputActionState<T = InputSignal> {
-  readonly name: string;
-  readonly value: T;
-  readonly pressed: boolean;
-  readonly released: boolean;
-  readonly held: boolean;
+export type InputSignalType =
+  | 'button'
+  | 'axis'
+  | 'pose'
+  | 'ray'
+  | 'grab-state'
+  | 'pinch-state'
+  | 'poke-state'
+  | 'tracking-validity';
+
+export type InputSignalValue = boolean | number | InputVector2 | InputPose | InputRay | null;
+
+export interface NormalizedInputSignal {
+  readonly id: string;
+  readonly deviceId: string;
+  readonly deviceType: InputDeviceType;
+  readonly path: string;
+  readonly type: InputSignalType;
+  readonly value: InputSignalValue;
+  readonly timestamp: number;
+}
+
+export interface RawInputEvent {
+  readonly deviceId: string;
+  readonly path: string;
+  readonly value: unknown;
+  readonly timestamp?: number;
+}
+
+export interface InputActionState<T = InputSignalValue> {
+  name: string;
+  value: T;
+  pressed: boolean;
+  released: boolean;
+  held: boolean;
 }
 
 export interface InputBinding {
@@ -52,25 +84,50 @@ export interface InputDevice {
 export interface InputDeviceAdapter {
   readonly id: string;
   readonly type: InputDeviceType;
-  poll(): void;
+  poll(): readonly RawInputEvent[];
 }
 
-export interface InputAction<T = InputSignal> {
+export interface InputAction<T = InputSignalValue> {
   readonly name: string;
   readonly state: InputActionState<T>;
 }
 
+export type InteractionIntentName =
+  | 'move'
+  | 'look'
+  | 'jump'
+  | 'grab'
+  | 'release'
+  | 'use'
+  | 'teleport'
+  | 'menu'
+  | 'select'
+  | 'cancel'
+  | 'pinch'
+  | 'poke'
+  | 'uiPress';
+
+export interface InteractionIntent<T = InputSignalValue> {
+  name: InteractionIntentName;
+  value: T;
+  active: boolean;
+}
+
 export interface InputSystem {
   registerAdapter(adapter: InputDeviceAdapter): void;
-  createAction<T = InputSignal>(name: string, config?: { initialValue?: T }): InputAction<T>;
+  createAction<T = InputSignalValue>(name: string, config?: { initialValue?: T }): InputAction<T>;
   activateContext(name: string): void;
   deactivateContext(name: string): void;
-  getAction<T = InputSignal>(name: string): InputAction<T> | null;
-  getActionValue<T = InputSignal>(name: string): T | null;
+  getAction<T = InputSignalValue>(name: string): InputAction<T> | null;
+  getActionValue<T = InputSignalValue>(name: string): T | null;
   rebind(action: string, binding: InputBinding): void;
   loadProfile(profile: InputProfile): void;
   exportProfile(): InputProfile;
   getDevices(): readonly InputDevice[];
+  update(timestamp?: number): void;
+  getSignals(): readonly NormalizedInputSignal[];
+  getIntents(): readonly InteractionIntent[];
 }
 
 export declare function createInputSystem(): InputSystem;
+export declare function inferSignalType(path: string, value: unknown): InputSignalType;

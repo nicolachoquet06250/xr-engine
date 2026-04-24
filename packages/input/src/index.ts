@@ -1,3 +1,5 @@
+export { createInputSystem, inferSignalType } from './input-runtime';
+
 export type {
   InputAction,
   InputBinding,
@@ -7,11 +9,14 @@ export type {
   InputDevice,
   InputDeviceAdapter,
   InputPose,
-  InputSignal,
+  InputRay,
   InputProfile,
+  InputSignalType,
+  InputSignalValue,
   InputVector2,
   InputDeviceType,
+  RawInputEvent,
+  NormalizedInputSignal,
+  InteractionIntent,
+  InteractionIntentName,
 } from './input';
-
-// Placeholder for input package
-export const placeholder = 'input package initialized';
