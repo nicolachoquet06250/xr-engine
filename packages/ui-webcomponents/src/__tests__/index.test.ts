@@ -18,12 +18,18 @@ describe('ui-webcomponents', () => {
     expect(customElements.get(defaultUIWebComponentTags.inputProfileViewer)).toBeDefined();
   });
 
-  it('expose un contrat événementiel sur xr-engine', async () => {
+  it('expose un contrat événementiel et un snapshot utile sur xr-engine', async () => {
     const element = document.createElement(defaultUIWebComponentTags.engine);
+
     const ready = new Promise<CustomEvent>((resolve) => {
       element.addEventListener('xr-engine-ready', (event) => resolve(event as CustomEvent), {
         once: true,
       });
+    });
+
+    const snapshots: unknown[] = [];
+    element.addEventListener('xr-ui-snapshot', (event) => {
+      snapshots.push((event as CustomEvent).detail);
     });
 
     document.body.append(element);
@@ -32,18 +38,46 @@ describe('ui-webcomponents', () => {
     expect(readyEvent.detail.route).toBe('/');
     expect(typeof readyEvent.detail.debugEnabled).toBe('boolean');
 
-    const snapshots: unknown[] = [];
-    element.addEventListener('xr-ui-snapshot', (event) => {
-      snapshots.push((event as CustomEvent).detail);
-    });
-
     (element as unknown as { dispatchUIAction: (action: { type: string }) => void }).dispatchUIAction({
       type: 'ui.debug.enable',
     });
 
-    expect(snapshots.length).toBeGreaterThanOrEqual(0);
+    const currentSnapshot = (element as unknown as { getSnapshot: () => { debugEnabled: boolean } }).getSnapshot();
+    expect(currentSnapshot.debugEnabled).toBe(true);
+    expect(snapshots.length).toBeGreaterThan(0);
 
     document.body.removeChild(element);
+  });
+
+  it('implémente des comportements publics sur xr-scene et xr-hud', () => {
+    const scene = document.createElement(defaultUIWebComponentTags.scene) as unknown as {
+      setActive: (active: boolean) => void;
+      setLoaded: (loaded: boolean) => void;
+      getState: () => { active: boolean; loaded: boolean };
+    };
+
+    const hud = document.createElement(defaultUIWebComponentTags.hud) as unknown as {
+      show: () => void;
+      hide: () => void;
+      toggle: () => boolean;
+      getState: () => { visible: boolean };
+    };
+
+    document.body.append(scene);
+    document.body.append(hud);
+
+    scene.setActive(false);
+    scene.setLoaded(true);
+    expect(scene.getState()).toMatchObject({ active: false, loaded: true });
+
+    hud.hide();
+    expect(hud.getState().visible).toBe(false);
+    hud.show();
+    expect(hud.getState().visible).toBe(true);
+    expect(typeof hud.toggle()).toBe('boolean');
+
+    document.body.removeChild(scene as unknown as Node);
+    document.body.removeChild(hud as unknown as Node);
   });
 
   it('supporte les tags personnalisés pour l’enregistrement', () => {
