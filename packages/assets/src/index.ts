@@ -10,7 +10,14 @@ export type {
   AssetManifest,
   TextureAsset,
   AssetDescriptor,
+  AssetType,
+  MaterialConfigAsset,
+  InputConfigAsset,
+  CreateAssetManagerOptions,
+  GltfAssetDescriptor,
+  CompressedAssetDescriptor,
+  StreamingAssetDescriptor,
+  StreamChunkDescriptor,
 } from './assets';
 
-// Placeholder for assets package
-export const placeholder = 'assets package initialized';
+export { createAssetManager, createAssetManifest } from './assets-runtime';

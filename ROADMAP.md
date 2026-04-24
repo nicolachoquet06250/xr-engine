@@ -1025,9 +1025,9 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ---
 
-## 17. Construire la couche assets → On en est là
+## 17. Construire la couche assets ✅
 
-### 17.1 Types d’assets
+### 17.1 Types d’assets ✅
 
 - mesh
 - texture
@@ -1038,7 +1038,7 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 - manifests
 - configs d’input
 
-### 17.2 Pipeline d’assets
+### 17.2 Pipeline d’assets ✅
 
 - chargement async
 - cache
@@ -1046,7 +1046,7 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 - préchargement
 - invalidation
 
-### 17.3 Phase 2
+### 17.3 Phase 2 ✅
 
 - glTF
 - compression
@@ -1055,7 +1055,7 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ---
 
-## 18. Construire la couche gameplay
+## 18. Construire la couche gameplay → On en est là
 
 ### 18.1 Objectif
 
