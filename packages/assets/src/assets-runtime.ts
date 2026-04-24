@@ -44,7 +44,9 @@ class JsonAssetLoader implements AssetLoader {
   public async load(context: AssetLoadContext): Promise<AssetHandle> {
     const response = await context.fetcher(context.descriptor.url, { signal: context.signal });
     if (!response.ok) {
-      throw new Error(`Unable to load asset "${context.descriptor.id}" from ${context.descriptor.url} (${response.status})`);
+      throw new Error(
+        `Unable to load asset "${context.descriptor.id}" from ${context.descriptor.url} (${response.status})`
+      );
     }
 
     const body = (await response.json()) as unknown;
@@ -197,7 +199,10 @@ export class AssetManagerImpl implements AssetManager {
   }
 }
 
-export function createAssetManifest(assets: readonly AssetDescriptor[], id?: string): AssetManifest {
+export function createAssetManifest(
+  assets: readonly AssetDescriptor[],
+  id?: string
+): AssetManifest {
   return Object.freeze({ id, version: '1', assets: Object.freeze([...assets]) });
 }
 

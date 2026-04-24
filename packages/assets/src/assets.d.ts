@@ -136,4 +136,7 @@ export interface CreateAssetManagerOptions {
 }
 
 export declare function createAssetManager(options?: CreateAssetManagerOptions): AssetManager;
-export declare function createAssetManifest(assets: readonly AssetDescriptor[], id?: string): AssetManifest;
+export declare function createAssetManifest(
+  assets: readonly AssetDescriptor[],
+  id?: string
+): AssetManifest;

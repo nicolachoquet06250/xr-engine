@@ -31,7 +31,10 @@ function createFakeFetcher() {
   const byUrl = new Map<string, { ok: boolean; status: number; payload?: unknown }>([
     ['/assets/mesh-player.json', { ok: true, status: 200, payload: { vertices: [0, 1, 2] } }],
     ['/assets/texture-fallback.json', { ok: true, status: 200, payload: { width: 1, height: 1 } }],
-    ['/assets/input-default.json', { ok: true, status: 200, payload: { actions: { jump: 'Space' } } }],
+    [
+      '/assets/input-default.json',
+      { ok: true, status: 200, payload: { actions: { jump: 'Space' } } },
+    ],
     ['/assets/texture-ui.json', { ok: false, status: 500 }],
   ]);
 
@@ -82,7 +85,9 @@ describe('assets runtime', () => {
     expect(second).toBe(mesh);
     expect(calls.filter((entry) => entry === meshDescriptor.url)).toHaveLength(1);
 
-    const fallback = await assets.load<{ width: number; height: number }>(fallbackTextureDescriptor.id);
+    const fallback = await assets.load<{ width: number; height: number }>(
+      fallbackTextureDescriptor.id
+    );
     expect(fallback.value.width).toBe(1);
   });
 
