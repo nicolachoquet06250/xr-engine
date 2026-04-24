@@ -162,7 +162,10 @@ describe('gameplay layer - selection and business interactions', () => {
       },
     });
 
-    const count = await services.interactions.dispatch({ type: 'select', payload: { actor: actor.id } });
+    const count = await services.interactions.dispatch({
+      type: 'select',
+      payload: { actor: actor.id },
+    });
 
     expect(picked?.entity.id).toBe('terminal');
     expect(count).toBe(1);

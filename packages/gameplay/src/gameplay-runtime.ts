@@ -1,4 +1,3 @@
-import type { Entity } from '@xr-engine/scene';
 import type {
   CreateGameplayServicesOptions,
   GameEvent,
@@ -22,6 +21,7 @@ import type {
   SpawnRequest,
   SpawnService,
 } from './gameplay';
+import type { Entity } from '@xr-engine/scene';
 
 class GameplayContextStore {
   private current: GameStateSnapshot;
@@ -306,8 +306,14 @@ class GameplayComposerImpl implements GameplayComposer {
     }
 
     const tags = Object.freeze([...(blueprint.tags ?? []), ...(overrides.tags ?? [])]);
-    const behaviours = Object.freeze([...(blueprint.behaviours ?? []), ...(overrides.behaviours ?? [])]);
-    const metadata = Object.freeze({ ...(blueprint.metadata ?? {}), ...(overrides.metadata ?? {}) });
+    const behaviours = Object.freeze([
+      ...(blueprint.behaviours ?? []),
+      ...(overrides.behaviours ?? []),
+    ]);
+    const metadata = Object.freeze({
+      ...(blueprint.metadata ?? {}),
+      ...(overrides.metadata ?? {}),
+    });
 
     return Object.freeze({
       blueprintId,
@@ -323,7 +329,9 @@ class GameplayComposerImpl implements GameplayComposer {
   }
 }
 
-export function createGameplayServices(options: CreateGameplayServicesOptions = {}): GameplayServices {
+export function createGameplayServices(
+  options: CreateGameplayServicesOptions = {}
+): GameplayServices {
   const contextStore = new GameplayContextStore(options.apis ?? {}, options.initialGameValue ?? {});
 
   return Object.freeze({
