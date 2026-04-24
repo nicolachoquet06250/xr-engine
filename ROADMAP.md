@@ -1102,13 +1102,13 @@ Cette couche sert de pont entre :
 
 ---
 
-## 20. Construire la couche UI WebComponents → On en est là
+## 20. Construire la couche UI WebComponents ✅
 
-### 20.1 Objectif
+### 20.1 Objectif ✅
 
 Exposer le moteur via des composants Vue 3 custom elements.
 
-### 20.2 Composants principaux
+### 20.2 Composants principaux ✅
 
 - `<xr-engine>`
 - `<xr-scene>`
@@ -1119,7 +1119,7 @@ Exposer le moteur via des composants Vue 3 custom elements.
 - `<xr-hand-debug>`
 - `<xr-input-profile-viewer>`
 
-### 20.3 Contrat
+### 20.3 Contrat ✅
 
 Chaque composant doit exposer :
 
@@ -1130,7 +1130,7 @@ Chaque composant doit exposer :
 
 ---
 
-## 21. Construire la couche devtools
+## 21. Construire la couche devtools → On en est là
 
 ### 21.1 Outils minimum
 
