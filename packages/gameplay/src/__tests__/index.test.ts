@@ -55,23 +55,35 @@ describe('gameplay layer - state machine and behaviour scripts', () => {
 
     services.state.register({
       id: 'menu',
-      enter: () => order.push('menu-enter'),
-      exit: () => order.push('menu-exit'),
+      enter: () => {
+        order.push('menu-enter');
+      },
+      exit: () => {
+        order.push('menu-exit');
+      },
     });
 
     services.state.register({
       id: 'playing',
-      enter: (context) => order.push(`playing-enter:${context.gameState.current}`),
-      update: (deltaTime) => updates.push(deltaTime),
+      enter: (context) => {
+        order.push(`playing-enter:${context.gameState.current}`);
+      },
+      update: (deltaTime) => {
+        updates.push(deltaTime);
+      },
     });
 
     services.scripts.add({
       id: 'score-behaviour',
-      onStart: (context) => order.push(`start:${String((context.apis.engine as { id: string }).id)}`),
+      onStart: (context) => {
+        order.push(`start:${String((context.apis.engine as { id: string }).id)}`);
+      },
       onUpdate: (deltaTime, context) => {
         updates.push(deltaTime + Number(context.gameState.value.score));
       },
-      onDestroy: () => order.push('destroy'),
+      onDestroy: () => {
+        order.push('destroy');
+      },
     });
 
     await services.state.transitionTo('menu');
