@@ -1055,13 +1055,13 @@ Une mécanique de jeu ne doit pas connaître le périphérique exact.
 
 ---
 
-## 18. Construire la couche gameplay → On en est là
+## 18. Construire la couche gameplay ✅
 
-### 18.1 Objectif
+### 18.1 Objectif ✅
 
 La couche gameplay sert à écrire la logique métier sans dépendre des détails du moteur.
 
-### 18.2 Contenu
+### 18.2 Contenu ✅
 
 - services de spawn
 - game state
@@ -1070,7 +1070,7 @@ La couche gameplay sert à écrire la logique métier sans dépendre des détail
 - interactions métier
 - aides à la composition d’objets de jeu
 
-### 18.3 Règles
+### 18.3 Règles ✅
 
 - dépend des APIs publiques uniquement
 - aucune dépendance aux détails WASM
@@ -1078,7 +1078,7 @@ La couche gameplay sert à écrire la logique métier sans dépendre des détail
 
 ---
 
-## 19. Construire la couche UI Core
+## 19. Construire la couche UI Core → On en est là
 
 ### 19.1 Objectif
 
