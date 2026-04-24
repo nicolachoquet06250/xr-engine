@@ -6,4 +6,7 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['packages/**/src/**/*.test.ts'],
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
 });
