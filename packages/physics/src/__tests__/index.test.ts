@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { vec3 } from '@xr-engine/math';
-import { createScene } from '../../../scene/src/scene-runtime';
+import { createScene } from '@xr-engine/scene';
 
 import { createPhysicsWorld } from '../index';
 
