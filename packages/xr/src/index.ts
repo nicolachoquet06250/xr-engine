@@ -1,19 +1,26 @@
+export { createXRManager } from './xr-runtime';
+
 export type {
   Handedness,
   XRConfig,
-  XRFrameState,
   XRControllerState,
-  XRMode,
+  XRFrameState,
+  XRHandJointName,
   XRHandJointState,
   XRHandState,
   XRHeadState,
   XRManager,
+  XRMode,
   XRPoseState,
+  XRRay,
   XRReferenceSpaceState,
+  XRRuntimeFrame,
+  XRRuntimeHandFrame,
+  XRRuntimeProvider,
+  XRRuntimeSession,
   XRSessionState,
   XRTrackingCapabilities,
+  XRTrackingMode,
+  XRTrackingSnapshot,
   XRTrackingState,
 } from './xr';
-
-// Placeholder for xr package
-export const placeholder = 'xr package initialized';
