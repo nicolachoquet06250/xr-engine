@@ -878,13 +878,13 @@ Prévoir :
 
 ---
 
-## 13. Construire le système d’input unifié → On en est là
+## 13. Construire le système d’input unifié ✅
 
-### 13.1 Pipeline
+### 13.1 Pipeline ✅
 
 Le moteur doit transformer :
 
-```text id="input-pipeline"
+```text id="input-pipeline" ✅
 Raw device state
 → adapters
 → normalized signals
@@ -893,7 +893,7 @@ Raw device state
 → gameplay
 ```
 
-### 13.2 Devices à supporter
+### 13.2 Devices à supporter ✅
 
 - keyboard
 - mouse
@@ -903,7 +903,7 @@ Raw device state
 - xr-hand-left
 - xr-hand-right
 
-### 13.3 Signaux normalisés
+### 13.3 Signaux normalisés ✅
 
 - bouton
 - axe
@@ -914,7 +914,7 @@ Raw device state
 - poke state
 - tracking validity
 
-### 13.4 Actions
+### 13.4 Actions ✅
 
 - move
 - look
@@ -932,7 +932,7 @@ Raw device state
 
 ---
 
-## 14. Construire la couche XR
+## 14. Construire la couche XR → On en est là
 
 ### 14.1 Gestion de session
 
