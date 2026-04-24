@@ -70,22 +70,29 @@ class UIStateStoreImpl<TState extends object> implements UIStateStore<TState> {
 }
 
 class UIEventBusImpl implements UIEventBus {
-  private readonly listeners = new Map<string, Set<(event: UIEvent) => void>>();
+  private readonly listeners = new Map<string, Set<(event: UIEvent<unknown>) => void>>();
 
-  public emit(event: UIEvent): void {
+  public emit<TPayload = unknown>(event: UIEvent<TPayload>): void {
     const scoped = this.listeners.get(event.type);
     if (!scoped) {
       return;
     }
 
     for (const listener of scoped) {
-      listener(event);
+      listener(event as UIEvent<unknown>);
     }
   }
 
-  public subscribe(type: string, listener: (event: UIEvent) => void): () => void {
+  public subscribe<TPayload = unknown>(
+    type: string,
+    listener: (event: UIEvent<TPayload>) => void
+  ): () => void {
     const scoped = this.listeners.get(type) ?? new Set();
-    scoped.add(listener);
+    const internal = (event: UIEvent<unknown>): void => {
+      listener(event as UIEvent<TPayload>);
+    };
+
+    scoped.add(internal);
     this.listeners.set(type, scoped);
 
     return () => {
@@ -94,7 +101,7 @@ class UIEventBusImpl implements UIEventBus {
         return;
       }
 
-      current.delete(listener);
+      current.delete(internal);
       if (current.size === 0) {
         this.listeners.delete(type);
       }
